@@ -1,0 +1,110 @@
+#!/bin/bash
+
+echo "This script tests most of the CBIC functions. It does NOT test: Enter Server Mode, Install Updated Parameters,"
+echo "and Install Electronic Gain Corrections, and Compose Bunch Pattern, Diagnostic Dump(takes too long), and"
+echo "Measure 4nS Bunch Currents(can't test run this script with multiple BPMS if this were included)"
+echo ""
+echo "Parameters: First - InstrumentAllocation to use"
+echo "            Second(optional) - any other string you want send to cbic, like ""-d 1"" "
+
+echo $1
+
+echo "cbic.conf:"
+echo ""
+cat cbic.conf
+
+date
+tv8 ../debug/bin/cbic -a -a $1 -d 1 << EOF
+0
+
+1
+
+
+4
+
+
+
+
+
+
+5
+
+1
+-1
+
+
+
+
+
+
+
+7
+8
+
+
+
+
+9
+
+10
+
+11
+
+
+
+
+
+y
+12
+
+13
+14
+15
+a
+
+16
+19
+20
+21
+22
+
+23
+
+24
+25
+
+26
+27
+y
+28
+
+
+
+29
+
+30
+
+33
+
+34
+
+37
+
+38
+
+
+39
+q
+32
+3
+
+2
+36
+EOF
+../production/bin/cbic -a $1 << EOF2
+15
+
+36
+EOF2
+date
+echo "Test Everything Complete" 

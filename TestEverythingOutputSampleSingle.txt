@@ -1,0 +1,4506 @@
+This script tests most of the CBIC functions. It does NOT test: Enter Server Mode, Install Updated Parameters,
+and Install Electronic Gain Corrections, and Compose Bunch Pattern, Diagnostic Dump(takes too long), and
+Measure 4nS Bunch Currents(can't test run this script with multiple BPMS if this were included)
+
+Parameters: First - InstrumentAllocation to use
+            Second(optional) - any other string you want send to cbic, like -d 1 
+Custom:mgs9-third
+cbic.conf:
+
+
+#=======================================================
+#        CBIC Application Configuration File
+#
+#  Please note: All paramters below are CASE SENSITIVE
+#=======================================================
+[APPLICATION_CONFIG]
+
+   #----------------------
+   # DSP Sofware Flashing
+   #----------------------
+   .CBI_PT_INST_EXE_PATH   /home/mgs9/mgs9/checkin/CBPM-TSHARC/instrument_code/bin/CBPM_II.ldr
+   
+
+   #---------------------------------------------
+   # Operational Constants/Parameters File Paths
+   #---------------------------------------------
+   .DET_PARAM_FILE         /nfs/cesr/online/instr/CBPM/config/BPM_DET_params.cfg
+   .INST_PARAM_FILE        /nfs/cesr/online/instr/CBPM/config/BPM_INST_params.cfg
+
+
+   #-------------------------------------------
+   # Data file output directories
+   # (Do not provide a trailing '/' character)
+   #-------------------------------------------
+   .RAW_DATA_DIR           /nfs/cesr/online/instr/data/cbpmII/raw
+   .PROC_DATA_DIR          /nfs/cesr/online/instr/data/cbpmII/proc
+   .TSCAN_DATA_DIR         /nfs/cesr/online/instr/data/cbpmII/tscan
+   .PHASE_DATA_DIR         /nfs/cesr/online/instr/data/cbpmII/phase
+   .PARAM_DIR              /nfs/cesr/online/instr/CBPM/config
+   .INST_PARAM_DIR         /nfs/cesr/online/instr/CBPM/config
+
+
+   #-----------------------------------------------------
+   # File containing List of instruments to bring online
+   #-----------------------------------------------------
+   .ALLOCATION_FILE        /nfs/cesr/online/instr/CBPM/allocation/Instrument_allocations
+
+
+   #----------------------------------------------
+   # Instrument Defaults
+   #----------------------------------------------
+   # Timing Setup
+   #  Valid options are:
+   #    4ns_P
+   #    4ns_E
+   #    14ns
+   #    4ns_P_FIX_G
+   #    4ns_E_FIX_G
+   #    14ns_FIX_G
+   #----------------------------------------------
+   .DEFAULT_TIMING_SETUP       14ns_FIX_G
+
+
+   #----------------------------------------------
+   # Gain Setting
+   # Valid options are: 0 - 10
+   #----------------------------------------------
+   .DEFAULT_GAIN_SETTING       5
+
+
+   #----------------------------------------------
+   # Bunch Pattern Definition File
+   #----------------------------------------------
+   .BUNCH_PAT_DEF_FILE       /nfs/cesr/online/instr/CBPM/config/bunch_patterns.cfg 
+	
+
+   #----------------------------------------------
+   #  Communications
+   # Valid options are:  ETHERNET,  XBUS
+   #----------------------------------------------
+   .COMM_METHOD                ETHERNET
+
+
+   
+Mon Jun 25 11:57:13 EDT 2012
+DEBUG PRINTOUT level 1 requested.
+debug level = 1, gui flag = 0, maint mode = 0 
+
+GTK+ Initialization successful.
+
+Using default application config file './cbic.conf'.
+Reading application configuration...
+Setting primary communications method to  ETHERNET 
+Timing setup taken from config file: (5) 14ns_FIX_G 
+Attempting connection to MPMnet manager...
+Mnet_connect call returned : 1
+Looking in file /nfs/cesr/online/instr/CBPM/allocation/Instrument_allocations
+Reading in the allocation  "Custom:mgs9-third" ... done.
+
+This program instance will become server ID [29] if placed in server mode.
+
+
+Number of instruments requested = 1
+
+
+
+----------------------------------------------------------------------
+Reading general instrument parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading location-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Reading instrument-specific parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading instrument-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Loading the Instrument Code parameters to all requested instruments...
+----------------------------------------------------------------------
+
+
+ *********************************************** 
+     New Time Scan Diagnostics Enabled  
+ ***********************************************
+
+
+Test Parameters
+
+ Value is  the input parameters fed to the PerformTest function
+ 0) ADC Saturation                               ,                Error, if value = TRUE        
+	Value is if INST_raw_data_header.ADC_saturation_bitfields[card] == 1 for any point in collect_raw
+
+ 1) ADC Signal too large                         ,        value =(E:    1.000)   W:    1.000            
+	Value is if INST_raw_data_header.ADC_high_threshold_bitfields[card] == 1 for any point during scan
+
+ 2) Sigma is Zero                                ,        value =(E:    0.000)   W:    0.000            
+	Sometimes all 16 turns come back with the same value, so this is to monitor if that happens again in the future.
+
+ 3) ADC Signal too small                         ,                Error, if value = TRUE        
+	Value is if INST_raw_data_header.ADC_low_threshold_bitfields[card] == 1 for all points during scan
+
+ 4) Block Delay value too near high edge         ,                W:  200.000    E:  100.000 <= value   (Block Delay - maxspan) - 100, 
+	value computed before time scan run
+ 5) Block Delay value too near low edge          ,       value <= E:  100.000    W:  200.000            Value is Block Delay
+
+ 6) Offset too near high edge                    ,                W:  923.000    E:  973.000 <= value   Max chip value (1023) - 50, 100
+ 7) Offset too near low edge                     ,       value <= E:   50.000    W:  100.000            Min chip value (0) + 50, 100
+ 8) Chip offsets too far apart                   ,                W:   70.000    E:  200.000 <= value   
+ 9) Min too far from Peak                        ,             v2*W: 1100.000 v2*E: 1200.000 < 10000*v1  fraction: v1/v2, v1 = maxAmp-minAmp, v2 = maxAmp
+
+10) (Difference of cross sums/Max Amp) too high  ,             v2*W: 4200.000 v2*E: 6000.000 < 10000*v1  v1 = Difference of cross sums, v2 = Max Amp
+11) 2nd order term in fit too high               ,             v2*W:    7.556 v2*E:    8.756 < 10000*v1  
+12) 2nd order term in fit too low                , 10000*v1 <= v2*E:    3.156 v2*W:    4.356           
+	ratio of -1.0 * term to max amplitude should be roughly 1/1800 = 0.000556, so 1000/1800 ~= 0.555
+
+13) Linear term in fit too high                  ,             v2*W:  175.000 v2*E:  225.000 < 10000*v1  
+14) Linear term in fit too low                   , 10000*v1 <= v2*E:   25.000 v2*W:   75.000           
+	ratio of term to max amplitude should be roughly 1/80 = 0.0125, so 1000/80 ~= 12.5
+
+15) Constant term in fit too low                 , 10000*v1 <= v2*E: 7200.000 v2*W: 8600.000           
+	ratio of term to max amplitude should be roughly 1 so 1000*1 = 1000
+
+16) Fit value too near high edge                 ,                W:   14.000    E:   16.000 <= value   Max fit value (2*CBPM_CAL_RADIUS) - 4
+17) Fit value too near low edge                  ,       value <= E:    4.000    W:    6.000            Min fit value (0) + 4
+
+18) RMS too big before timing adjust             ,                W:  700.000    E: 1400.000 <= value   
+	Before adjusting the timing the RMS from 1024 turns is too big
+
+19) RMS too big after timing adjust              ,                W:  120.000    E:  400.000 <= value   
+	After adjusting the timing the RMS from 1024 turns is too big
+
+20) Chipvalue changed too much                   ,                W:   40.000    E:  200.000 <= value   
+21) Chip to chip value changed too much          ,                W:    4.000    E:   20.000 <= value   
+22) Peak scan took too long                      ,                W:  597.000    E:  603.000 <= value   
+23) Too many time scan tries                     ,                W:    3.000    E:    4.000 <= value   
+24) Absolute Value of Block Delay slosh too big  ,                W:   50.000    E:  500.000 <= value   
+25) ALU Error                                    ,                Warning, if value = TRUE      
+
+
+Execution flags
+      0       1       2       3       4       5       6       7       8       9      10      11 
+      0       0       0       0       0       0       0       4       1    1024       0       0 
+
+
+-------- Verifying connectivity for instrument ctacf074 --------
+ CBPM PKT ALL  101, Ping test to [ctacf074]...OK, Read IDENT via ETHERNET,    Identification Read [32;1mOK[0m 
+
+
+ 1 Instrument is ONLINE.
+
+Location     = 8AW
+Checking communications structure versions for instrument <ctacf074>...
+EXE Name = CBPM_II.ldr
+Setting up and activating BPM  ctacf074 (192.168.32.124 )  @  CBPM PKT ALL 101 
+Initializing active gain setting to '-1'
+Sending all: phase, pedestal, gain configuration, and timing configuration settings. 
+Commanding gain and timing setup settings...
+<ctacf074>   CMD_DONE  (3)
+OP TIMING SETUP VALUE = 5 [14ns_FIX_G]
+Block delays = 895   303
+<ctacf074>   CMD_DONE  (3)
+gain setting = 0  (gain code = 0)
+Sending all code parameters...
+Final timing setup = 5 [14ns_FIX_G]
+
+
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 0 - FIND bTMD
+
+********* FIND BLOCK TURN MARKER DELAY **********
+Will use cached channel delays.
+Checking timing setup of the first active device.
+Startup checks shall have ensured that all active
+devices are configured for the same timing setup.
+
+Enter species [POSITRONS=0, ELECTRONS=1]    : TBLOCK = 0
+Setting number of turns to 2
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+ 
+
+Settings determined for TIMING BLOCK 0:
+   b_p_offset = 124
+   cTMD       = 0
+   bTMD       = 1
+   Initial CD = 512
+
+
+                                == FIND bTMD Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 1 - FIND BUNCH
+
+*********FIND BUNCH*****************
+Channel delays are being set on the instrument.
+Enter species [POSITRONS=0, ELECTRONS=1] [0]: Saving input as last value   0
+species = (0) POSITRONS
+Enter number of turns : [2]: Saving input as last value   2
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+MailboxID = 0
+    CMD PARAMS Structure Contents
+species     :  0
+num_turns   :  2
+trig_turns_delay:  0
+spacex_turn :  0
+delay_cal   :  0
+gain_cal    :  0
+gain_xcal   :  0
+avg_mode    :  0
+scale_mode  :  0
+update_mode :  0
+  Pre-Rotation        Post-Rotation 
+---------------------------------------
+0  |   |   |   |     0  |   |   |   |
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+................     ................
+-------------
+num_turns   = 2
+num bunches = 183
+Number of words to retrieve = 73200
+Retrieving block_0 data...
+Maximum intensity signal found in bucket #  0/366  of this timing block
+Dumping data to file '/nfs/cesr/online/instr/data/cbpmII/tscan/43/FB-043757-074.dat'.
+
+                                == FIND BUNCH Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 4 - GET TURN-BY-TURN DATA
+
+********* RAW DATA *********
+   (l)oad predefined, 
+   (i)ndividual bunch selection,
+   (r)ange of bunches 
+Specify the bunch pattern entry method:  [l]: Saving input as last value   l
+input = l
+
+
+Available bunch pattern categories:
+  1) GENERAL
+  2) TESTING
+  3) 14ns_Trains
+  4) EC_Tune_Shift
+  5) LET/IBS
+  6) Gain_Calibration
+  7) Checkout_for_FII_Study
+Choose category  [1]: Saving input as last value   1
+input = 1
+Category = GENERAL
+ 1)  T1B1__Train_1-Bunch_1
+ 2)  First_ten_4ns
+ 3)  e-_1x20
+ 4)  e-_9x1
+ 5)  e+_10_bunches_4ns
+ 6)  e+45bun_4ns
+ 7)  e-14ns_45bun
+ 8)  e-14ns_20bun
+ 9)  CHESSe+4x6
+10)  e+_1-30
+11)  Bunch-1-ELECTRONS
+12)  e-_BUNCH_1
+13)  onebunch
+14)  twobunches
+15)  45
+Choose pattern  [1]: Saving input as last value   1
+input = 1
+
+
+ Bunch Pattern Representation: 
+1 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+
+   (a) 60Hz line-synchronous trigger 
+   (b) Injection trigger 
+   (n)o triggering 
+Select acquisition triggering type:  [n]: Saving input as last value   n
+input = 2
+Will immediately acquire the data with no trigger.
+
+Will provide PEDESTAL-SUBTRACTED and GAIN-SCALED data.
+Number of turns to acquire: [1024]: Saving input as last value   1024
+Perform an automatic TIMING adjustment as part of acquisition?  [y/n][n]: Saving input as last value   n
+Prep() function status = 2
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-  CMD_DONE  (3)
+--Post function loop...
+
+
+                                == GET TURN-BY-TURN DATA Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+Running cbpm_write_all_raw_data.
+MailboxID = 0
+Writing data to file RD-012638.dat
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 5 - GET PROCESSED DATA
+
+********* PROCESSED DATA *********
+Enter species [POSITRONS=0, ELECTRONS=1] [0]: Saving input as last value   0
+species = (0) POSITRONS
+
+
+Enter the number of each bunch you wish to examine, 
+each followed by a carriage return.
+Note: Bunches for two species are INTERLEAVED.
+      i.e. For e+ bunches 1,2 & 3  one would enter
+           1 <CR>  3<CR>  5<CR>  -1<CR>
+Enter -1 to end input session.
+> >    (a) 60Hz line-synchronous trigger 
+   (b) Injection trigger 
+   (n)o triggering 
+Select acquisition triggering type:  [n]: Saving input as last value   n
+input = 2
+Will immediately acquire the data with no trigger.
+
+Number of turns to acquire: [1024]: Saving input as last value   1024
+Pedstal-subtract data [y/n]? [y]: Saving input as last value   y
+Gain-scale data [y/n]? [y]: Saving input as last value   y
+Use JITTER SUPPRESSION calculation method [y/n]? [y]: Saving input as last value   y
+Perform an automatic TIMING adjustment prior to acquiring [y/n]? [n]: Saving input as last value   n
+Perform a GAIN adjustment prior to acquiring   [y/n]? [n]: Saving input as last value   n
+Num turns = 1024
+ped sub   = 1
+g scale   = 1
+Processed data buffer index will be reset to 0 for this command.
+use_enable_gate = 0
+Prep() function status = 2
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+MailboxID = 0
+Processed data acquisition results for BPM ctacf074 (192.168.32.124)   CESR index: EXT 101
+Full filename = /nfs/cesr/online/instr/data/cbpmII/proc/142/PROC-142448.dat
+
+                                == GET PROCESSED DATA Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+
+
+                                  - Turn counter synchronization summary -
+
+  8AW     ctacf074  244280   |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 7 - FIND cTMD
+
+--Copying and transferring structure set...
+--Post function loop...
+Bunch pattern offset BEFORE cTMD setting = 0
+BP offset = 124
+   cTMD      = 9
+<ctacf074>   CMD_DONE  (3)
+
+                                == FIND cTMD Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 8 - GET BETATRON PHASE
+
+********* GET BETATRON PHASE *********
+This will calculate the betatron phase coefficients for a single bunch of
+either species, and generate setup/comparison coefficient tables for
+instrument installation and diagnostic purposes.
+Enter species [POSITRONS=0, ELECTRONS=1] [0]: Saving input as last value   0
+species = (0) POSITRONS
+Which bunch do you want to examine (1-183) [1]: Saving input as last value   1
+Will acquire 40960 turns of data.
+   (a) 60Hz line-synchronous trigger 
+   (b) Injection trigger 
+   (n)o triggering 
+Select acquisition triggering type:  [n]: Saving input as last value   n
+input = 2
+Will immediately acquire the data with no trigger.
+
+Answering this question will start the acquistiion.
+
+Generate phase tables for setup/comparison? [y/n][y]: Saving input as last value   y
+Prep() function status = 1
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+
+
+                                == GET BETATRON PHASE Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+MailboxID = 0
+********************* Bunch = 1
+target_Xphase = 153.586716
+target_Yphase = 171.707474
+generate tables = 1
+**********************************************
+Stored Offset       = 1
+Stored Wait Value   = 0
+**********************************************
+[INFO  ]cbpm_phase2db:  X,Y amplitude,phase written for turns offset (1) and phase_race_wait (0) to node CSRBPM PDATA 1601-1616
+[INFO  ]cbpm_phase2db:  X,Y amplitude,phase written for turns offset (1) and phase_race_wait (0) to node BTN PHA DATA 1601-1616
+Average signal amplitudes: 1791.177490   1901.313110   293.300903   628.348877
+-- Writing BUTTON data for ctacf074 (192.168.32.124) / CESR_BPM_8AW 
+   to elements 801 through 804 in node BPM ORB DATA 
+-- Writing BUTTON data for ctacf074 (192.168.32.124) / CESR_BPM_8AW 
+   to elements 701 through 704 in node BPM ORB DATA 
+
+
+
+                                  - Turn counter synchronization summary -
+
+  8AW     ctacf074  936664   |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 9 - SAVE TIMING PARAMETERS
+
+
+
+Would you like to save the timing parameters to an intermediate file? (y/n): [n]: Saving input as last value   n
+Timing values not saved.
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 10 - SAVE PEDESTAL PARAMETERS
+
+
+
+Would you like to save the pedestal tables to an intermediate file? (y/n): [n]: Saving input as last value   n
+Tables not saved.
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 11 - TIME SCAN
+
+************ TIME SCAN *************
+Enter species [POSITRONS=0, ELECTRONS=1] [0]: Saving input as last value   0
+species = (0) POSITRONS
+Which bunch do you want to examine (1-183) [1]: Saving input as last value   1
+Generate delay corrections [y/n]? [y]: Saving input as last value   y
+Printf level (0-6) ? [6]: Saving input as last value   6
+Override Time Scan Protection ? [n]: Saving input as last value   n
+Would you like to see a waveform plot [y/n]? [n]:  |Input:y]| Saving input as last value   y
+Will average 'fitter' data over 16 turns.
+
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+Obtaining waveform data...
+
+                                == TIME SCAN Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+MailboxID = 0
+max block delay  = 1400
+init block delay = 229
+block step size  = 1
+writing # delay steps = 1400
+Dumping TIMING SCAN data to file 'TS-043758-074.dat'.
+Each point is a 10-turn average.
+MailboxID = 0
+Dumping CHANNEL CALIBRATION data to file 'CC-043758-074.dat'.
+
+
+
+   Timing Adjustment Summary:               
+
+                          Card-to-card change      Absolute change on each card   
+                      (diff from c0 before/after)                                      
+BAD                                                   c0     c1     c2    c3 
+------------------------------------------------------------------------------------
+
+Round(New Peaks)
+   13, 13, 13, 13, 
+
+Offsets hist
+0:   512,   512,   512,   512, 
+1:   842,   828,   881,   848, 
+2:   709,   701,   751,   721, 
+3:   711,   703,   751,   721, 
+4:     0,     0,     0,     0, 
+
+Peaks hist
+0:   0.0,   0.0,   0.0,   0.0, 
+1:  13.6,  20.0,  17.3,  20.0, 
+2:  14.5,  14.7,  12.6,  12.6, 
+3:  12.5,  12.5,  12.9,  12.7, 
+4:   0.0,   0.0,   0.0,   0.0, 
+
+Chips hist = Offsets + Peaks, and Block hist
+0:   512,   512,   512,   512,      895 
+1:   855,   848,   898,   868,      798   accepted
+2:   723,   715,   763,   733,      929   accepted
+3:   723,   715,   763,   733,      929   accepted
+4:     0,     0,     0,     0,        0 
+
+Old Chipvalues, and Old BlockDelay
+    512,  512,  512,  512,      895 
+
+New Chipvalues, and New BlockDelay
+    724,  716,  764,  734,      929 
+
+ReTries: 2
+Test Results:  0 = Uninitialized, 1 = Success, 2 = Warning, 3 = Error
+Try  Result :  0 = SUCCESS, 3 = WARNING, 6 = FAILURE
+
+Instrument Test Results History 1 Result:	6	AcceptTiming:	1	Rollback:	   0
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  0   0   0   0   0   0   0   0   0   2   0   0   0   1   0   0   0   0   0   0   2  -1   0  -1   1   0    5
+  0   0   0   0  -1  -1   0   0  -1   2  -1   0   1   1   0   2   2   0   0   0   2   1  -1  -1  -1  -1    8
+  0   0   0   0  -1  -1   0   0  -1   2  -1   0   0   1   0   1   2   0   0   0   2   2  -1  -1  -1  -1    7
+  0   0   0   0  -1  -1   0   0  -1   2  -1   0   0   1   0   1   2   0   0   0   2   1  -1  -1  -1  -1    6
+
+  0   0   0   0   0   0   3   0  -3  11  -3   0   1   4   0   4   6   0   0   0   8   4   0  -1   1  -3 
+
+Instrument Test Results History 2 Result:	6	AcceptTiming:	1	Rollback:	   0
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  0   0   0   0   0   0   0   0   0   2   0   0   0   1   0   1   1   0   0   0   0  -1   0   0   1   0    6
+  0   0   0   0  -1  -1   0   0  -1   2  -1   0   0   1   0   0   1   0   0   0   0   0  -1  -1  -1  -1    1
+  0   0   0   0  -1  -1   0   0  -1   2  -1   1   0   1   0   0   0   0   0   0   0   0  -1  -1  -1  -1    1
+  0   0   0   0  -1  -1   0   0  -1   1  -1   0   0   1   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -1
+
+  0   0   0   0   0   0   3   0  -3  10  -3   1   0   4   0   1   2   0   0   0   0   0   0   0   1  -3 
+
+Instrument Test Results History 3 Result:	3	AcceptTiming:	1	Rollback:	   0
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0  -1   0   0   0   0    1
+  0   0   0   0  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -3
+  0   0   0   0  -1  -1   0   0  -1   1  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -2
+  0   0   0   0  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -3
+
+  0   0   0   0   0   0   3   0  -3   5  -3   0   0   0   0   0   0   0   0   0   0   0   0   0   0  -3 
+	Iteration #4 not run.
+
+-----------------------------------------------------------
+Instrument Test Results
+
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+  0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0  -1   0   0   0   0    1
+  0   0   0   0  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -3
+  0   0   0   0  -1  -1   0   0  -1   1  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -2
+  0   0   0   0  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   0   0  -1  -1  -1  -1   -3
+
+  0   0   0   0   0   0   3   0  -3   5  -3   0   0   0   0   0   0   0   0   0   0   0   0  -3  -3  -3 
+
+
+Test  9, Card 0, Warning:                         Min too far from Peak, Val:  1164.2
+Test  9, Card 2, Warning:                         Min too far from Peak, Val:  1167.5
+Instrument Test Values Step 1
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0   798.0   798.0   842.0   842.0    53.0  1245.4     8.4     6.7     6.7   181.7   181.7  8725.3    13.6    13.6    24.3    49.0   247.0     0.0   595.0     0.0    97.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   828.0   828.0     0.0  2703.1     0.0     3.6     3.6   212.9   212.9  7196.4    20.0    20.0    50.8    69.4   239.0     8.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   881.0   881.0     0.0  1888.3     0.0     6.2     6.2   213.8   213.8  8101.4    17.3    17.3    26.1    42.9   289.0    42.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   848.0   848.0     0.0  2191.4     0.0     5.0     5.0   214.5   214.5  7687.5    20.0    20.0    14.2    38.4   259.0    12.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 2
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0   929.0   929.0   709.0   709.0    50.0  1534.3    39.3     7.1     7.1   205.3   205.3  8476.2    14.5    14.5    48.3    51.3     1.0     0.0   595.0     1.0   131.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   701.0   701.0     0.0  1392.7     0.0     6.2     6.2   182.5   182.5  8600.3    14.7    14.7    68.7    53.8     1.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   751.0   751.0     0.0  1369.0     0.0     8.0     8.0   201.4   201.4  8672.9    12.6    12.6    42.9    45.8     3.0     2.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   721.0   721.0     0.0  1195.8     0.0     7.0     7.0   175.1   175.1  8834.1    12.6    12.6    38.4    38.3     3.0     2.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 3
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0   929.0   929.0   711.0   711.0    48.0  1164.2    53.2     6.8     6.8   169.5   169.5  8887.7    12.5    12.5    51.4    51.8     0.0     0.0   595.0     2.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   703.0   703.0     0.0  1067.6     0.0     6.3     6.3   157.9   157.9  8941.6    12.5    12.5    54.3    54.6     0.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   751.0   751.0     0.0  1167.5     0.0     6.6     6.6   170.8   170.8  8826.7    12.9    12.9    46.0    46.3     0.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   721.0   721.0     0.0  1038.7     0.0     5.8     5.8   146.2   146.2  8979.9    12.7    12.7    38.6    38.6     0.0     0.0     0.0     0.0     0.0     0.0 
+
+
+Local Warn Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     1.0     0.0     1.0  1200.0   200.0   923.0   100.0    70.0  1100.0  4200.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     0.0   597.0     3.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+
+Local Err Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     1.0     0.0     1.0  1300.0   100.0   973.0    50.0   200.0  1200.0  6000.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0     0.0   603.0     4.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+
+timingUpdateIsGood = 1
+
+Local Test Results: 6
+
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+  0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   2  -1   0   0  -1  -1    1
+  0   0   0   0  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   2   1  -1  -1  -1  -1    0
+  0   0   0   0  -1  -1   0   0  -1   1  -1   0   0   0   0   0   0   0   0   0   2   2  -1  -1  -1  -1    2
+  0   0   0   2  -1  -1   0   0  -1   0  -1   0   0   0   0   0   0   0   0   0   2   1  -1  -1  -1  -1    2
+
+  0   0   0   2   0   0   3   0  -3   5  -3   0   0   0   0   0   0   0   0   0   8   4   0  -3  -4  -4 
+
+
+Test  3, Card 3, Error:                            ADC Signal too small, W:     1.0, E:     1.0, Val:     1.0
+Test  9, Card 0, Warning:                         Min too far from Peak, W:  1100.0, E:  1200.0, Val:  1164.2
+Test  9, Card 2, Warning:                         Min too far from Peak, W:  1100.0, E:  1200.0, Val:  1167.5
+Test 20, Card 0, Error:                      Chipvalue changed too much, W:    40.0, E:   200.0, Val:   211.0
+Test 20, Card 1, Error:                      Chipvalue changed too much, W:    40.0, E:   200.0, Val:   203.0
+Test 20, Card 2, Error:                      Chipvalue changed too much, W:    40.0, E:   200.0, Val:   251.0
+Test 20, Card 3, Error:                      Chipvalue changed too much, W:    40.0, E:   200.0, Val:   221.0
+Test 21, Card 1, Warning:           Chip to chip value changed too much, W:     4.0, E:    20.0, Val:     8.0
+Test 21, Card 2, Error:             Chip to chip value changed too much, W:     4.0, E:    20.0, Val:    40.0
+Test 21, Card 3, Warning:           Chip to chip value changed too much, W:     4.0, E:    20.0, Val:    10.0
+
+Local Test Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0   104.4     0.0   929.0   929.0   711.0   711.0    48.0  1164.2    53.2     6.8     6.8   169.5   169.5  8887.7    12.5    12.5    51.4    51.8   211.0     0.0   595.0     2.0     0.0     0.0 
+    0.0     0.0   120.1     0.0     0.0     0.0   703.0   703.0     0.0  1067.6     0.0     6.3     6.3   157.9   157.9  8941.6    12.5    12.5    54.3    54.6   203.0     8.0     0.0     0.0     0.0     0.0 
+    0.0     0.0    65.0     0.0     0.0     0.0   751.0   751.0     0.0  1167.5     0.0     6.6     6.6   170.8   170.8  8826.7    12.9    12.9    46.0    46.3   251.0    40.0     0.0     0.0     0.0     0.0 
+    0.0     0.0    58.1     1.0     0.0     0.0   721.0   721.0     0.0  1038.7     0.0     5.8     5.8   146.2   146.2  8979.9    12.7    12.7    38.6    38.6   221.0    10.0     0.0     0.0     0.0     0.0 
+--------------------------------------------------------------
+
+Difference between Test Results on Instrument and Local
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0  -1  -1 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   1   0   0   0   0 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   2   0   0   0   0 
+  0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   1   0   0   0   0 
+
+[X]    8AW (ctacf074)        +8    -40    -10       +212   +204   +252   +222
+
+
+Execution flags
+      0       1       2       3       4       5       6       7       8       9      10      11 
+      1       0       0       0       0       1       0       4       1    1024   25564       0 
+
+
+******************************************************************************************************************************************************************
+
+    ***************************************************************
+    *                           WARNING                           *
+    * Large timing adjustments were performed on  1 Instruments!*
+    *                (See summary above for details.)             *
+    ***************************************************************
+
+
+
+                                  - Turn counter synchronization summary -
+
+  8AW     ctacf074  160448   |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 12 - SET GAINS
+
+
+*********** SET GAIN *****************
+ All channels will be set to the same gain.
+Enter a gain setting index between 1 and 10 inclusive [4]: Saving input as last value   4
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+gain setting = 4  (gain code = 264)
+
+                                == SET GAINS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 13 - GET TEMPERATURES
+
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+   --  8AW  :  ctacf074    (CBPM PKT ALL 101)  --
+Dig temp:  32 C
+Tim temp:  38 C
+FE0 temp:  41 C
+FE1 temp:  42 C
+FE2 temp:  42 C
+FE3 temp:  43 C
+
+                                == GET TEMPERATURES Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 14 - REREAD PARAMETER FILES
+
+
+
+
+----------------------------------------------------------------------
+Reading general instrument parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading location-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Reading instrument-specific parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading instrument-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Loading the Instrument Code parameters to all requested instruments...
+----------------------------------------------------------------------
+
+
+ *********************************************** 
+     New Time Scan Diagnostics Enabled  
+ ***********************************************
+
+
+Test Parameters
+
+ Value is  the input parameters fed to the PerformTest function
+ 0) ADC Saturation                               ,                Error, if value = TRUE        
+	Value is if INST_raw_data_header.ADC_saturation_bitfields[card] == 1 for any point in collect_raw
+
+ 1) ADC Signal too large                         ,        value =(E:    1.000)   W:    1.000            
+	Value is if INST_raw_data_header.ADC_high_threshold_bitfields[card] == 1 for any point during scan
+
+ 2) Sigma is Zero                                ,        value =(E:    0.000)   W:    0.000            
+	Sometimes all 16 turns come back with the same value, so this is to monitor if that happens again in the future.
+
+ 3) ADC Signal too small                         ,                Error, if value = TRUE        
+	Value is if INST_raw_data_header.ADC_low_threshold_bitfields[card] == 1 for all points during scan
+
+ 4) Block Delay value too near high edge         ,                W:  200.000    E:  100.000 <= value   (Block Delay - maxspan) - 100, 
+	value computed before time scan run
+ 5) Block Delay value too near low edge          ,       value <= E:  100.000    W:  200.000            Value is Block Delay
+
+ 6) Offset too near high edge                    ,                W:  923.000    E:  973.000 <= value   Max chip value (1023) - 50, 100
+ 7) Offset too near low edge                     ,       value <= E:   50.000    W:  100.000            Min chip value (0) + 50, 100
+ 8) Chip offsets too far apart                   ,                W:   70.000    E:  200.000 <= value   
+ 9) Min too far from Peak                        ,             v2*W: 1100.000 v2*E: 1200.000 < 10000*v1  fraction: v1/v2, v1 = maxAmp-minAmp, v2 = maxAmp
+
+10) (Difference of cross sums/Max Amp) too high  ,             v2*W: 4200.000 v2*E: 6000.000 < 10000*v1  v1 = Difference of cross sums, v2 = Max Amp
+11) 2nd order term in fit too high               ,             v2*W:    7.556 v2*E:    8.756 < 10000*v1  
+12) 2nd order term in fit too low                , 10000*v1 <= v2*E:    3.156 v2*W:    4.356           
+	ratio of -1.0 * term to max amplitude should be roughly 1/1800 = 0.000556, so 1000/1800 ~= 0.555
+
+13) Linear term in fit too high                  ,             v2*W:  175.000 v2*E:  225.000 < 10000*v1  
+14) Linear term in fit too low                   , 10000*v1 <= v2*E:   25.000 v2*W:   75.000           
+	ratio of term to max amplitude should be roughly 1/80 = 0.0125, so 1000/80 ~= 12.5
+
+15) Constant term in fit too low                 , 10000*v1 <= v2*E: 7200.000 v2*W: 8600.000           
+	ratio of term to max amplitude should be roughly 1 so 1000*1 = 1000
+
+16) Fit value too near high edge                 ,                W:   14.000    E:   16.000 <= value   Max fit value (2*CBPM_CAL_RADIUS) - 4
+17) Fit value too near low edge                  ,       value <= E:    4.000    W:    6.000            Min fit value (0) + 4
+
+18) RMS too big before timing adjust             ,                W:  700.000    E: 1400.000 <= value   
+	Before adjusting the timing the RMS from 1024 turns is too big
+
+19) RMS too big after timing adjust              ,                W:  120.000    E:  400.000 <= value   
+	After adjusting the timing the RMS from 1024 turns is too big
+
+20) Chipvalue changed too much                   ,                W:   40.000    E:  200.000 <= value   
+21) Chip to chip value changed too much          ,                W:    4.000    E:   20.000 <= value   
+22) Peak scan took too long                      ,                W:  597.000    E:  603.000 <= value   
+23) Too many time scan tries                     ,                W:    3.000    E:    4.000 <= value   
+24) Absolute Value of Block Delay slosh too big  ,                W:   50.000    E:  500.000 <= value   
+25) ALU Error                                    ,                Warning, if value = TRUE      
+
+
+Execution flags
+      0       1       2       3       4       5       6       7       8       9      10      11 
+      0       0       0       0       0       0       0       4       1    1024       0       0 
+Prep() function status = 0
+--Copying and transferring structure set...
+--Post function loop...
+OP TIMING.active_timing_setup = 5 [14ns_FIX_G]
+
+                                == REREAD PARAMETER FILES Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 15 - SELECT ACTIVE INSTRUMENTS
+
+      Location      Hostname    IP Address        Timing   XBUS Node        Module Type        FE-FPGAs     BUILD ID  
+               Active                           HB  |                  Ele.           DB-FPGA                          Timing Setup
+------------------------------------------------------------------------------------------------------------------------------------
+  1)   8AW       *  ctacf074                    OK  OK   CBPM PKT ALL  101    BPM W/FE   5.8   47,47,47,47  1206251103      14ns_FIX_G 
+
+Instrument activation:  (a)ll, (n)one, (r)ange toggle, (i)nvert all, (s)ingle toggle, (q)uit : [q]: Saving input as last value   q
+
+Prep() function status = 0
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 16 - IDLE COMMAND
+
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+
+                                == IDLE COMMAND Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 19 - ACQUIRE PEDESTALS
+
+***** PEDESTAL ACQUISITION *****
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+PEDESTAL ACQUISITION TIMING SETUP = 5 [14ns_FIX_G] 
+PEDESTAL ACQUISITION COMBO TABLE  = 2 
+
+ Timing setup group: 4ns_P_VAR_G
+ mg_setup = 0
+  PEDESTAL TABLE FOR ctacf074 ()
+-2885.733  -37.639  -37.894  -36.944  -31.918  -25.063  -18.002    0.077   66.138   13.247  -19.022  
+-3398.214  -36.422  -38.794  -39.009  -39.850  -42.716  -48.511  -61.234  -118.863  -525.395  -1276.646  
+-9030.179  -27.438  -29.628  -33.285  -36.314  -42.879  -39.810  -73.935  -184.271  -423.987  -684.126  
+-10026.257  -38.130  -40.065  -43.207  -45.554  -51.005  -48.586  -74.124  -153.977  -405.761  -511.791  
+
+-1121.566  -32.877  -31.194  -28.851  -22.561  -13.082    5.365   45.096   108.462   92.574   82.612  
+-947.521  -44.226  -45.621  -46.260  -44.577  -44.627  -46.759  -64.443  -97.865  -579.244  -1186.630  
+-1551.308  -30.266  -32.311  -35.752  -38.931  -43.237  -34.147  -50.716  -143.817  -206.764  -270.195  
+-632.366  -30.937  -32.341  -36.146  -41.879  -49.219  -46.186  -70.627  -151.014  -426.801  -641.409  
+
+  PED RMS TABLE FOR ctacf074 ()
+ 48.975    7.488    7.423    8.229    8.471   10.135   14.522   23.573   45.113   52.684   110.431  
+ 36.414    7.356    7.681    7.956    8.665   10.178   15.102   25.390   46.358   52.052   107.671  
+ 69.790    7.831    7.670    7.652    8.647   10.072   14.188   23.478   42.463   45.339   87.317  
+ 178.175    7.746    7.929    7.968    9.084   10.547   14.641   25.076   46.563   54.958   115.712  
+
+ 18.291    7.751    7.898    8.255    8.449   10.059   14.226   24.799   45.969   53.827   108.712  
+ 13.943    7.510    7.673    7.997    8.747   10.112   14.621   24.817   48.339   51.533   122.423  
+ 10.077    7.263    7.579    7.800    8.579   10.283   14.884   23.047   46.684   45.237   94.540  
+ 10.227   21.219    7.540    7.842    8.974   10.239   14.180   23.252   45.653   48.787   98.028  
+
+
+
+ Timing setup group: 4ns_E_VAR_G
+ mg_setup = 1
+  PEDESTAL TABLE FOR ctacf074 ()
+ 105.741  -490.949  -784.175  -1417.062  -2640.779  -5447.477  -11225.855  -25009.531  -32760.676  -9401.095   16115.082  
+-197.574  -509.179  -810.820  -1450.862  -2694.606  -5488.487  -11283.767  -25057.277  -32760.650  -9841.377   13533.608  
+-91.926  -814.253  -1289.653  -2018.818  -3785.998  -9517.392  -25082.580  -31251.428  -14235.676   12269.692   32747.633  
+ 72.700  -841.243  -1291.172  -1998.572  -3588.861  -8958.413  -23008.230  -32748.793  -18431.613   8098.197   32743.418  
+
+ 1756.682   40.431   51.280   71.788   104.896   173.692   275.559   560.294   1393.743   3378.894   7902.028  
+ 3297.339   60.574   63.418   83.605   118.383   181.963   298.279   578.286   967.204   2767.290   6538.823  
+ 5430.775   63.290   66.896   92.286   121.866   179.905   240.212   324.600   868.434   2759.602   8893.109  
+-1451.077    0.202    2.606   26.550   57.986   121.750   204.938   268.208   786.900   1795.161   7717.901  
+
+  PED RMS TABLE FOR ctacf074 ()
+ 11.628   19.309   22.059   21.365   49.382   71.940   174.990   537.294   234.133   932.430   1247.764  
+  8.818   18.183   21.723   27.313   48.659   111.423   249.193   535.600   234.739   926.103   1061.227  
+ 21.757   1050.145   25.456   27.597   59.698   184.693   510.247   393.705   778.226   1106.111   609.192  
+ 20.508   1050.934   21.700   24.657   52.160   170.235   461.740   434.216   853.055   1333.865   748.721  
+
+ 47.659    9.042    8.931    9.586   10.470   12.714   19.510   34.010   59.001   130.483   201.045  
+ 110.998    7.980    8.614    8.856    9.603   11.246   15.177   24.828   46.706   52.105   102.158  
+ 218.925    7.586    7.821    8.128    9.510   12.158   21.010   40.754   98.404   250.106   417.089  
+ 263.305    7.576    7.656    7.948    8.665   12.108   23.085   42.295   103.008   277.594   486.190  
+
+
+
+ Timing setup group: 14ns_VAR_G
+ mg_setup = 2
+  PEDESTAL TABLE FOR ctacf074 ()
+ 1052.841  -24.508  -19.911   -1.797   30.950   79.255   107.398   287.021   817.542   884.119   1200.847  
+ 1096.559  -23.729  -21.791  -12.976   17.743   66.504   171.562   447.319   401.669   1410.584  -697.461  
+ 296.847   -7.878   -6.824   -4.539    6.308   35.701   111.242   307.547   658.294   1921.013   3544.997  
+ 225.506  -41.072  -41.203  -42.017  -43.436  -51.259  -72.907  -61.111   -8.034  -270.601  -444.927  
+
+ 281.797  -25.252  -16.648    3.985   47.207   100.190   153.347   375.973   832.871   602.665   877.795  
+ 671.242  -36.386  -29.117  -14.230   19.022   72.200   154.445   340.970   525.673   382.846  -793.333  
+ 60.947  -17.512  -16.077  -13.212   -6.992    2.621   20.994   105.605   334.623   870.809   1820.098  
+ 58.245  -26.994  -28.169  -26.393  -21.408  -15.286   -7.346   57.913   286.237   797.891   1906.258  
+
+  PED RMS TABLE FOR ctacf074 ()
+ 21.513    7.703    7.659    7.794    8.703   10.519   14.857   26.445   48.642   75.992   158.504  
+ 11.476    7.517    7.679    8.182   10.383   15.486   31.703   63.010   109.854   377.883   602.906  
+ 12.290    7.709    7.723    8.537    9.836   13.505   20.614   38.195   114.744   198.442   633.679  
+ 11.331    7.823    7.936    8.220    8.934   10.181   14.745   24.723   47.544   65.712   125.328  
+
+ 24.212    7.688    7.871    7.710    8.937   11.835   18.137   31.650   71.349   141.786   283.794  
+ 49.822    7.419    7.492    7.857    8.874   10.174   16.015   25.852   46.264   74.754   138.199  
+ 22.592    7.262    7.324    7.710    8.523   10.837   14.828   24.501   45.075   56.496   107.706  
+ 14.894   62.608    7.879    8.199    8.486   10.905   14.905   23.783   43.955   56.215   109.664  
+
+
+
+
+
+                                == ACQUIRE PEDESTALS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 20 - DUMP RAW DATA
+
+--Copying and transferring structure set...
+--Post function loop...
+
+                                == DUMP RAW DATA Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+Running cbpm_write_all_raw_data.
+MailboxID = 0
+Writing data to file RD-012639.dat
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 21 - CHECK PULSE
+
+--Copying and transferring structure set...
+--Post function loop...
+-----------------
+Instrument heartbeat:    OK!
+Timing integrity    : GOOD   Turns seen: 39013
+
+
+
+                                == CHECK PULSE Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 22 - SET TIMING SETUP
+
+  0) 4ns_P_VAR_G
+  1) 4ns_E_VAR_G
+  2) 14ns_VAR_G
+  3) 4ns_P_FIX_G
+  4) 4ns_E_FIX_G
+  5) 14ns_FIX_G
+Enter timing setup [2]: Saving input as last value   2
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+OP TIMING SETUP VALUE = 2 [14ns_VAR_G]
+Block delays = 915   324
+
+                                == SET TIMING SETUP Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 23 - INSTALL UPDATED PARAMETERS
+
+
+
+Would you like install the changes present in file:
+  /nfs/cesr/online/instr/CBPM/config/08/instrument_parameters.008802 
+ into the master operational parameters file: /nfs/cesr/online/instr/CBPM/config/BPM_INST_params.cfg ?
+Enter [y/n][n]: Saving input as last value   n
+Prep() function status = 0
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 24 - RESET COLDFIRE
+
+--Copying and transferring structure set...
+--Post function loop...
+Closing all open sockets to instruments.
+Resetting the Coldfire/CBInet server via XBUS for instrument index = 0...
+Done
+
+                                == RESET COLDFIRE Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+Waiting 22s for CBInet servers to complete boot process... Done.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 25 - PROGRAM FLASH
+
+
+
+Would you like to begin the flash programming process for ALL active instruments? (y/n): [n]: Saving input as last value   n
+Flash programming operation aborted.
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 26 - RESET AND INIT
+
+Sequence type encountered with 5 steps.
+
+Skipping communication connect!
+
+--Copying and transferring structure set...
+--Post function loop...
+
+                                == RESET INSTRUMENT Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Waiting 22s for instruments to boot...
+Pushing gain configuration values...
+--Copying and transferring structure set...
+--Post function loop...
+OP TIMING.active_timing_setup = 2 [14ns_VAR_G]
+
+                                == PUSH FULL CONFIG Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Setting gains
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+gain setting = 5  (gain code = 272)
+
+                                == SET GAINS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Setting timing setup
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+OP TIMING SETUP VALUE = 2 [14ns_VAR_G]
+Block delays = 915   324
+
+                                == SET TIMING SETUP Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+Skipping communication connect!
+
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 27 - POWER CYCLE - RESET AND INIT
+
+Sequence type encountered with 6 steps.
+
+
+Would you like to cycle power for ALL active instruments? (y/n): [n]:  |Input:y]| Saving input as last value   y
+Turning off power to all active instruments...
+Waiting for 4 seconds for power supply bleed-down...
+Turning on power supplies...
+
+Skipping communication connect!
+
+--Copying and transferring structure set...
+--Post function loop...
+
+                                == POWER CYCLE Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+Waiting for 7 seconds for Cold Fire to boot back up...
+
+Skipping communication connect!
+
+--Copying and transferring structure set...
+--Post function loop...
+
+                                == RESET INSTRUMENT Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Waiting 22s for instruments to boot...
+Pushing all cached timng and gain configuration values...
+--Copying and transferring structure set...
+--Post function loop...
+OP TIMING.active_timing_setup = 2 [14ns_VAR_G]
+
+                                == PUSH FULL CONFIG Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Setting gains
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+gain setting = 5  (gain code = 272)
+
+                                == SET GAINS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Setting timing setup
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+OP TIMING SETUP VALUE = 2 [14ns_VAR_G]
+Block delays = 915   324
+
+                                == SET TIMING SETUP Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Synchronizing all instrument turn counters...  done.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 28 - TIME-IN
+
+Sequence type encountered with 8 steps.
+
+
+Select the desired timing conditions:
+   1 = Positrons, 4nSec, timing block A - Variable Gain
+   2 = Positrons, 4nSec, timing block B - Variable Gain    Time-scan ONLY
+   3 = Positrons, 14nSec - Variable Gain
+
+   4 = Electrons, 4nSec, timing block A - Variable Gain
+   5 = Electrons, 4nSec, timing block B - Variable Gain    Time-scan ONLY
+   6 = Electrons, 14nSec - Variable Gain
+
+   7 = Positrons, 4nSec, timing block A - FIXED Gain
+   8 = Positrons, 4nSec, timing block B - FIXED Gain    Time-scan ONLY
+   9 = Positrons, 14nSec - FIXED Gain
+
+   10 = Electrons, 4nSec, timing block A - FIXED Gain
+   11 = Electrons, 4nSec, timing block B - FIXED Gain    Time-scan ONLY
+   12 = Electrons, 14nSec - FIXED Gain
+
+
+ "T1B1" bunch current should be in the neighborhood of 0.75mA--1.25mA for this process.
+
+  -1 = Done
+  Conditions: Selection : [1]: Saving input as last value   1
+ 4ns 'LDINIT' --  LOAD  Train-1  Bunch-1  ('T1B1')  POSITRONS
+
+
+Provide gain setting (0-10) to use for this process [0]: Saving input as last value   0
+
+
+
+-------------------------------------------------
+  Scrubbing timing parameters for block A
+-------------------------------------------------
+--Copying and transferring structure set...
+--Post function loop...
+TIMING setup = 0
+SCRUB TIMING PARAMS for BLOCK 0
+Block delays = -1   968
+
+                                == SCRUB TIMING PARAMS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Setting timing setup to 4ns_P_VAR_G 
+-------------------------------------------------
+1 instruments online 
+Initializing cTMD value to 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+OP TIMING SETUP VALUE = 0 [4ns_P_VAR_G]
+Block delays = -1   968
+
+                                == SET TIMING SETUP Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Configuring gains for setting # 0.
+-------------------------------------------------
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+--Post function loop...
+gain setting = 0  (gain code = 0)
+
+                                == SET GAINS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Determining INITIAL BLOCK TURNS MARKER DELAY for block A...
+-------------------------------------------------
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+ 
+
+Settings determined for TIMING BLOCK 0:
+   b_p_offset = 56
+   cTMD       = 0
+   bTMD       = 6
+   Initial CD = 512
+
+
+                                == FIND bTMD Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Determining COMMON TURNS MARKER DELAY 
+-------------------------------------------------
+--Copying and transferring structure set...
+--Post function loop...
+Bunch pattern offset BEFORE cTMD setting = 0
+BP offset = 56
+   cTMD      = 3
+<ctacf074>   CMD_DONE  (3)
+
+                                == FIND cTMD Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Determining FINAL BLOCK TURNS MARKER DELAY for block A...
+-------------------------------------------------
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+ 
+
+Settings determined for TIMING BLOCK 0:
+   b_p_offset = 28
+   cTMD       = 3
+   bTMD       = 6
+   Initial CD = 512
+
+
+                                == FIND bTMD Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+
+-------------------------------------------------
+  Time scan (BUNCH 1)...
+-------------------------------------------------
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+Obtaining waveform data...
+
+                                == TIME SCAN Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+MailboxID = 0
+max block delay  = 800
+init block delay = 0
+block step size  = 1
+writing # delay steps = 800
+Dumping TIMING SCAN data to file 'TS-043759-074.dat'.
+Each point is a 10-turn average.
+MailboxID = 0
+Dumping CHANNEL CALIBRATION data to file 'CC-043759-074.dat'.
+
+
+
+   Timing Adjustment Summary:               
+
+                          Card-to-card change      Absolute change on each card   
+                      (diff from c0 before/after)                                      
+BAD                                                   c0     c1     c2    c3 
+------------------------------------------------------------------------------------
+
+Round(New Peaks)
+   8, 8, 8, 8, 
+
+Offsets hist
+0:   512,   512,   512,   512, 
+1:   460,   460,   460,   460, 
+2:   460,   460,   460,   460, 
+3:   460,   460,   460,   460, 
+4:   460,   460,   460,   460, 
+5:   460,   460,   460,   460, 
+6:     0,     0,     0,     0, 
+
+Peaks hist
+0:   0.0,   0.0,   0.0,   0.0, 
+1:   8.0,   8.0,   8.0,   8.0, 
+2:   8.0,   8.0,   8.0,   8.0, 
+3:   8.0,   8.0,   8.0,   8.0, 
+4:   8.0,   8.0,   8.0,   8.0, 
+5:   8.0,   8.0,   8.0,   8.0, 
+6:   0.0,   0.0,   0.0,   0.0, 
+
+Chips hist = Offsets + Peaks, and Block hist
+0:   512,   512,   512,   512,       -1 
+1:   467,   467,   467,   467,       22 
+2:   467,   467,   467,   467,       22 
+3:   467,   467,   467,   467,       22 
+4:   467,   467,   467,   467,       22 
+5:   467,   467,   467,   467,       22 
+6:     0,     0,     0,     0,        0 
+
+Old Chipvalues, and Old BlockDelay
+    512,  512,  512,  512,       -1 
+
+New Chipvalues, and New BlockDelay
+    491,  491,  491,  491,       22 
+
+ReTries: 4
+Test Results:  0 = Uninitialized, 1 = Success, 2 = Warning, 3 = Error
+Try  Result :  0 = SUCCESS, 3 = WARNING, 6 = FAILURE
+
+Instrument Test Results History 1 Result:	6	AcceptTiming:	0	Rollback:	   1
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0  -1   0   0   10
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0  -1   0  -3 
+
+Instrument Test Results History 2 Result:	6	AcceptTiming:	0	Rollback:	   1
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   0   0   0   11
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0   0   0  -3 
+
+Instrument Test Results History 3 Result:	6	AcceptTiming:	0	Rollback:	   1
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   0   0   0   11
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0   0   0  -3 
+
+Instrument Test Results History 4 Result:	6	AcceptTiming:	0	Rollback:	   1
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   1   0   0   12
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0   1   0  -3 
+
+Instrument Test Results History 5 Result:	6	AcceptTiming:	0	Rollback:	   1
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   2   0   0   13
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0   2   0  -3 
+	Iteration #6 not run.
+
+-----------------------------------------------------------
+Instrument Test Results
+
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   2   0   0   13
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0  -1  -3  -3 
+
+
+Test  0, Card 0, Error:                                  ADC Saturation, Val:     0.0
+Test  0, Card 1, Error:                                  ADC Saturation, Val:     0.0
+Test  0, Card 2, Error:                                  ADC Saturation, Val:     0.0
+Test  0, Card 3, Error:                                  ADC Saturation, Val:     0.0
+Test  1, Card 0, Warning:                          ADC Signal too large, Val:     0.0
+Test  1, Card 1, Warning:                          ADC Signal too large, Val:     0.0
+Test  1, Card 2, Warning:                          ADC Signal too large, Val:     0.0
+Test  1, Card 3, Warning:                          ADC Signal too large, Val:     0.0
+Test  2, Card 0, Warning:                                 Sigma is Zero, Val:     0.0
+Test  2, Card 1, Warning:                                 Sigma is Zero, Val:     0.0
+Test  2, Card 2, Warning:                                 Sigma is Zero, Val:     0.0
+Test  2, Card 3, Warning:                                 Sigma is Zero, Val:     0.0
+Test  5, Card 0, Error:             Block Delay value too near low edge, Val:    22.0
+Test 12, Card 0, Error:                   2nd order term in fit too low, Val:     0.0
+Test 12, Card 1, Error:                   2nd order term in fit too low, Val:     0.0
+Test 12, Card 2, Error:                   2nd order term in fit too low, Val:     0.0
+Test 12, Card 3, Error:                   2nd order term in fit too low, Val:     0.0
+Test 14, Card 0, Error:                      Linear term in fit too low, Val:     0.0
+Test 14, Card 1, Error:                      Linear term in fit too low, Val:     0.0
+Test 14, Card 2, Error:                      Linear term in fit too low, Val:     0.0
+Test 14, Card 3, Error:                      Linear term in fit too low, Val:     0.0
+Test 20, Card 0, Warning:                    Chipvalue changed too much, Val:    44.0
+Test 20, Card 1, Warning:                    Chipvalue changed too much, Val:    44.0
+Test 20, Card 2, Warning:                    Chipvalue changed too much, Val:    44.0
+Test 20, Card 3, Warning:                    Chipvalue changed too much, Val:    44.0
+Test 23, Card 0, Error:                        Too many time scan tries, Val:     4.0
+Instrument Test Values Step 1
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0   646.8     0.0    44.0     0.0   595.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0    71.6     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0   441.6     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0   375.7     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 2
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0   595.0     1.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 3
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0   594.0     2.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 4
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0   595.0     3.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+
+Instrument Test Values Step 5
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     0.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0   595.0     4.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+    0.0     0.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    44.0     0.0     0.0     0.0     0.0     0.0 
+
+
+Local Warn Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     1.0     0.0     1.0  1200.0   200.0   923.0   100.0    70.0  1100.0  4200.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     0.0   597.0     3.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   923.0   100.0     0.0  1100.0     0.0     7.6     4.4   175.0    75.0  8600.0    14.0     6.0   700.0   120.0    40.0     4.0     0.0     0.0     0.0     0.0 
+
+Local Err Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    0.0     1.0     0.0     1.0  1300.0   100.0   973.0    50.0   200.0  1200.0  6000.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0     0.0   603.0     4.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+    0.0     1.0     0.0     1.0     0.0     0.0   973.0    50.0     0.0  1200.0     0.0     8.8     3.2   225.0    25.0  7200.0    16.0     4.0  1400.0   400.0   200.0    20.0     0.0     0.0     0.0     0.0 
+
+timingUpdateIsGood = 0
+
+Local Test Results: 6
+
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+  2   1   1   0   0   2   0   0   0   0   0   0   2   0   2   0   0   0   0   0   1  -1   0   2  -1  -1   11
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+  2   1   1   0  -1  -1   0   0  -1   0  -1   0   2   0   2   0   0   0   0   0   1   0  -1  -1  -1  -1    6
+
+  8   4   4   0   0   2   3   0  -3   3  -3   0   8   0   8   0   0   0   0   0   4   0   0  -1  -4  -4 
+
+
+Test  0, Card 0, Error:                                  ADC Saturation, W:     0.0, E:     0.0, Val:     1.0
+Test  0, Card 1, Error:                                  ADC Saturation, W:     0.0, E:     0.0, Val:     1.0
+Test  0, Card 2, Error:                                  ADC Saturation, W:     0.0, E:     0.0, Val:     1.0
+Test  0, Card 3, Error:                                  ADC Saturation, W:     0.0, E:     0.0, Val:     1.0
+Test  1, Card 0, Warning:                          ADC Signal too large, W:     1.0, E:     1.0, Val:     1.0
+Test  1, Card 1, Warning:                          ADC Signal too large, W:     1.0, E:     1.0, Val:     1.0
+Test  1, Card 2, Warning:                          ADC Signal too large, W:     1.0, E:     1.0, Val:     1.0
+Test  1, Card 3, Warning:                          ADC Signal too large, W:     1.0, E:     1.0, Val:     1.0
+Test  2, Card 0, Warning:                                 Sigma is Zero, W:     0.0, E:     0.0, Val:     0.0
+Test  2, Card 1, Warning:                                 Sigma is Zero, W:     0.0, E:     0.0, Val:     0.0
+Test  2, Card 2, Warning:                                 Sigma is Zero, W:     0.0, E:     0.0, Val:     0.0
+Test  2, Card 3, Warning:                                 Sigma is Zero, W:     0.0, E:     0.0, Val:     0.0
+Test  5, Card 0, Error:             Block Delay value too near low edge, W:   200.0, E:   100.0, Val:    22.0
+Test 12, Card 0, Error:                   2nd order term in fit too low, W:     4.4, E:     3.2, Val:     0.0
+Test 12, Card 1, Error:                   2nd order term in fit too low, W:     4.4, E:     3.2, Val:     0.0
+Test 12, Card 2, Error:                   2nd order term in fit too low, W:     4.4, E:     3.2, Val:     0.0
+Test 12, Card 3, Error:                   2nd order term in fit too low, W:     4.4, E:     3.2, Val:     0.0
+Test 14, Card 0, Error:                      Linear term in fit too low, W:    75.0, E:    25.0, Val:     0.0
+Test 14, Card 1, Error:                      Linear term in fit too low, W:    75.0, E:    25.0, Val:     0.0
+Test 14, Card 2, Error:                      Linear term in fit too low, W:    75.0, E:    25.0, Val:     0.0
+Test 14, Card 3, Error:                      Linear term in fit too low, W:    75.0, E:    25.0, Val:     0.0
+Test 20, Card 0, Warning:                    Chipvalue changed too much, W:    40.0, E:   200.0, Val:    45.0
+Test 20, Card 1, Warning:                    Chipvalue changed too much, W:    40.0, E:   200.0, Val:    45.0
+Test 20, Card 2, Warning:                    Chipvalue changed too much, W:    40.0, E:   200.0, Val:    45.0
+Test 20, Card 3, Warning:                    Chipvalue changed too much, W:    40.0, E:   200.0, Val:    45.0
+Test 23, Card 0, Error:                        Too many time scan tries, W:     3.0, E:     4.0, Val:     4.0
+
+Local Test Values:
+    0       1       2       3       4       5       6       7       8       9      10      11      12      13      14      15      16      17      18      19      20      21      22      23      24      25
+    1.0     1.0     0.0     0.0    22.0    22.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    45.0     0.0   595.0     4.0     0.0     0.0 
+    1.0     1.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    45.0     0.0     0.0     0.0     0.0     0.0 
+    1.0     1.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    45.0     0.0     0.0     0.0     0.0     0.0 
+    1.0     1.0     0.0     0.0     0.0     0.0   460.0   460.0     0.0     0.0     0.0     0.0     0.0     0.0     0.0 10000.0     8.0     8.0     0.0     0.0    45.0     0.0     0.0     0.0     0.0     0.0 
+--------------------------------------------------------------
+
+Difference between Test Results on Instrument and Local
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  -1  -1 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
+  0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
+
+[ ]    8AW (ctacf074)        +0     +0     +0        -21    -21    -21    -21
+
+
+Execution flags
+      0       1       2       3       4       5       6       7       8       9      10      11 
+      1       0       0       0       0       1       0       4       1    1024   79504       0 
+
+
+******************************************************************************************************************************************************************
+
+
+
+                                  - Turn counter synchronization summary -
+
+  8AW     ctacf074  187271   |
+
+
+Pre-computing BLOCK B values for bTMD, GD, and CDs...
+Setting BLOCK B bTMD value to   bTMD(A) + 2...
+Setting BLOCK B block delay to   gd(A) + 400...
+Inheriting BLOCK B CHANNEL DELAYS 
+   --- [ctacf074]   -   CESR_BPM_8AW ---
+BP offsets               :  28  28
+Common turns marker delay:  3
+Block turns marker delays:  6  8  
+block_delays              :  22  422  
+Channel delays           :  491  491  491  491
+                            491  491  491  491
+
+
+
+
+Would you like to save the timing parameters to an intermediate file? (y/n): [n]: Saving input as last value   n
+Timing values not saved.
+Prep() function status = 6
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 29 - INSTALL ELECTRONIC GAIN CORRECTIONS
+
+
+
+Would you like to replace all gain tables in the
+existing set of parameters with those that appear in the file
+  ./gain_cal_electronic.in
+and save the result to an intermediate file? (y/n): [n]: Saving input as last value   n
+Tables not installed.
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 30 - APPLY GAIN MAPPING CORRECTIONS
+
+
+
+
+
+Would you like to apply the gain mapping corrections from the file
+  ./gain_cal_mapping.in 
+to existing parameters for all instruments COMMON to the master parameter file
+and the gain mapping coefficients input file, and save the result to 
+an intermediate file?: (y/n):[n]: Saving input as last value   n
+
+
+Gain mapping corrections not applied.
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 33 - SCRUB TIMING PARAMS
+
+Enter timing block to scrub [block A = 0,  block B = 1] : Prep() function status = 0
+--Copying and transferring structure set...
+--Post function loop...
+TIMING setup = 0
+SCRUB TIMING PARAMS for BLOCK 1
+Block delays = 22   -1
+
+                                == SCRUB TIMING PARAMS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 34 - COPY TIMING PARAMS A-->B
+
+Timing setup is presently: 0 [4ns_P_VAR_G]
+
+
+
+************************************************
+ This mirrors all block A timing values into 
+ timing block B for efficiency in acqiring
+ calibration data.
+
+ The undo this, you must restart the program.
+************************************************
+Do you wish to proceed [y/n]? [n]: Saving input as last value   n
+ 
+
+ Action aborted. 
+
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 37 - Enable FG Zero-Crossing Sample Point
+
+Timing setup is presently: 0 [4ns_P_VAR_G]
+
+
+
+***********************************************************
+ This shifts the waveform sample point on 
+ BLOCK A and B for all active instruments 0.4ns (40 computer units) 
+ later in time to examine the waveform zero-crossing point.
+
+ This is only accurate for the FIXED GAIN amplifier mode.
+
+ The undo this change, you must restart the program.
+************************************************************
+Do you wish to proceed [y/n]? [n]: Saving input as last value   n
+ 
+
+ Action aborted. 
+
+Prep() function status = 6
+'Prep' returned failure.  Back to menu.
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 38 - Install Turn-By-Turn Bunch Pattern
+
+ == Multibunch Turn-By-Turn Data Acquisition ==
+
+
+
+Available bunch pattern categories:
+  1) GENERAL
+  2) TESTING
+  3) 14ns_Trains
+  4) EC_Tune_Shift
+  5) LET/IBS
+  6) Gain_Calibration
+  7) Checkout_for_FII_Study
+Choose category  [1]: Saving input as last value   1
+input = 1
+Category = GENERAL
+ 1)  T1B1__Train_1-Bunch_1
+ 2)  First_ten_4ns
+ 3)  e-_1x20
+ 4)  e-_9x1
+ 5)  e+_10_bunches_4ns
+ 6)  e+45bun_4ns
+ 7)  e-14ns_45bun
+ 8)  e-14ns_20bun
+ 9)  CHESSe+4x6
+10)  e+_1-30
+11)  Bunch-1-ELECTRONS
+12)  e-_BUNCH_1
+13)  onebunch
+14)  twobunches
+15)  45
+Choose pattern  [1]: Saving input as last value   1
+input = 1
+
+
+ Bunch Pattern Representation: 
+1 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+
+     Category  = multibunch_for_servers
+     Entry num = 1
+     Name      = pattern
+1 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+
+Writing to file...
+        pattern name...
+        bunch pattern...
+
+
+*******************************************************************************
+  Bunch pattern has been installed for server use.
+*******************************************************************************
+Prep() function status = 0
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 39 - Test Life
+
+Prep() function status = 0
+--Copying and transferring structure set...
+--Post function loop...
+
+                                == Test Life Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+Executing 'final' function...
+
+
+ *********************************************************************************************************
+Compared CBI_CMD_TAG
+[ERROR | 06/25/12 11:59:25]cbi_rw_struct:  XBUS packet READ error for struct cbi_cmd from node CBPM PKT ALL 101 - cbi_rw_struct FAILURE. 
+[ERROR | 06/25/12 11:59:25]cbi_gp_struct:  Unable to READ  (struct_tag = 1) from:   CBPM PKT ALL 101
+
+Compared CBI_STAT_TAG
+Compared CBI_IDENT_TAG
+Compared CBI_HEARTBEAT_TAG
+Compared CBI_MODULE_CONFIG_TAG
+Compared CBPM_TIMING_CONFIG_TAG
+Compared CBPM_GAIN_CONFIG_TAG
+Compared CBPM_CAL_PARAMS_TAG
+
+Structure       : 0 1 2 3 4 5 6 7 
+ethernetAllZeros: 0 0 0 0 0 0 0 1 
+
+Structure Key : 
+0 CBI_CMD_TAG
+1 CBI_STAT_TAG
+2 CBI_IDENT_TAG
+3 CBI_HEARTBEAT_TAG
+4 CBI_MODULE_CONFIG_TAG
+5 CBPM_TIMING_CONFIG_TAG
+6 CBPM_GAIN_CONFIG_TAG
+7 CBPM_CAL_PARAMS_TAG
+
+  8AW (ctacf074)   
+Mon Jun 25 11:59:25 2012 - Type 'q' and then <ENTER> to exit loop: 
+
+****************************************************************************************
+
+
+
+Please wait (3 sec)...
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 32 - Clear Debug Struct
+
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074>   CMD_DONE  (3)
+
+                                == Clear Debug Struct Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 3 - TEST DATA BUFFERS
+
+********* TEST RAW DATA ************
+Enter value to use for scrubbing  [123]: Saving input as last value   123
+Prep() function status = 0
+--Copying and transferring structure set...
+--Initializing command...
+--Executing command...
+--Waiting for handshake completion...
+<ctacf074> .-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-.-\|/-  CMD_DONE  (3)
+--Post function loop...
+            WIPE Find delay params check:
+ use_data_enable    = -50
+ hist_index    = -50
+             ETHERNET READBACK Find delay params check:
+ use_data_enable    = 11
+ hist_index    = 11
+[ERROR | 06/25/12 11:59:32]cbi_rw_struct:  XBUS packet READ error for struct cbpm_find_delay_params from node CBPM PKT ALL 101 - cbi_rw_struct FAILURE. 
+[ERROR | 06/25/12 11:59:32]cbi_gp_struct:  Unable to READ  (struct_tag = 34) from:   CBPM PKT ALL 101
+
+             XBUS READBACK Find delay params check:
+ use_data_enable    = 11
+ hist_index    = 11
+
+
+pre_pf_peak_block_delays: 11  11  11  11  
+
+pre_pf_offset_chan_delays: 11  11  11  11  
+
+
+ADC buffers
+     0)  123 127 124 128 125 129 126 130
+     1)  124 128 125 129 126 130 127 131
+     2)  125 129 126 130 127 131 128 132
+     3)  126 130 127 131 128 132 129 133
+     4)  127 131 128 132 129 133 130 134
+     5)  128 132 129 133 130 134 131 135
+     6)  129 133 130 134 131 135 132 136
+     7)  130 134 131 135 132 136 133 137
+     8)  131 135 132 136 133 137 134 138
+     9)  132 136 133 137 134 138 135 139
+    10)  133 137 134 138 135 139 136 140
+    11)  134 138 135 139 136 140 137 141
+    12)  135 139 136 140 137 141 138 142
+    13)  136 140 137 141 138 142 139 143
+    14)  137 141 138 142 139 143 140 144
+    15)  138 142 139 143 140 144 141 145
+    16)  139 143 140 144 141 145 142 146
+    17)  140 144 141 145 142 146 143 147
+    18)  141 145 142 146 143 147 144 148
+    19)  142 146 143 147 144 148 145 149
+    20)  143 147 144 148 145 149 146 150
+    21)  144 148 145 149 146 150 147 151
+    22)  145 149 146 150 147 151 148 152
+    23)  146 150 147 151 148 152 149 153
+    24)  147 151 148 152 149 153 150 154
+    25)  148 152 149 153 150 154 151 155
+    26)  149 153 150 154 151 155 152 156
+    27)  150 154 151 155 152 156 153 157
+    28)  151 155 152 156 153 157 154 158
+    29)  152 156 153 157 154 158 155 159
+    30)  153 157 154 158 155 159 156 160
+    31)  154 158 155 159 156 160 157 161
+    32)  155 159 156 160 157 161 158 162
+    33)  156 160 157 161 158 162 159 163
+    34)  157 161 158 162 159 163 160 164
+    35)  158 162 159 163 160 164 161 165
+    36)  159 163 160 164 161 165 162 166
+    37)  160 164 161 165 162 166 163 167
+    38)  161 165 162 166 163 167 164 168
+    39)  162 166 163 167 164 168 165 169
+    40)  163 167 164 168 165 169 166 170
+    41)  164 168 165 169 166 170 167 171
+    42)  165 169 166 170 167 171 168 172
+    43)  166 170 167 171 168 172 169 173
+    44)  167 171 168 172 169 173 170 174
+    45)  168 172 169 173 170 174 171 175
+    46)  169 173 170 174 171 175 172 176
+    47)  170 174 171 175 172 176 173 177
+    48)  171 175 172 176 173 177 174 178
+    49)  172 176 173 177 174 178 175 179
+    50)  173 177 174 178 175 179 176 180
+    51)  174 178 175 179 176 180 177 181
+    52)  175 179 176 180 177 181 178 182
+    53)  176 180 177 181 178 182 179 183
+    54)  177 181 178 182 179 183 180 184
+    55)  178 182 179 183 180 184 181 185
+    56)  179 183 180 184 181 185 182 186
+    57)  180 184 181 185 182 186 183 187
+    58)  181 185 182 186 183 187 184 188
+    59)  182 186 183 187 184 188 185 189
+    60)  183 187 184 188 185 189 186 190
+    61)  184 188 185 189 186 190 187 191
+    62)  185 189 186 190 187 191 188 192
+    63)  186 190 187 191 188 192 189 193
+    64)  187 191 188 192 189 193 190 194
+    65)  188 192 189 193 190 194 191 195
+    66)  189 193 190 194 191 195 192 196
+    67)  190 194 191 195 192 196 193 197
+    68)  191 195 192 196 193 197 194 198
+    69)  192 196 193 197 194 198 195 199
+    70)  193 197 194 198 195 199 196 200
+    71)  194 198 195 199 196 200 197 201
+    72)  195 199 196 200 197 201 198 202
+    73)  196 200 197 201 198 202 199 203
+    74)  197 201 198 202 199 203 200 204
+    75)  198 202 199 203 200 204 201 205
+    76)  199 203 200 204 201 205 202 206
+    77)  200 204 201 205 202 206 203 207
+    78)  201 205 202 206 203 207 204 208
+    79)  202 206 203 207 204 208 205 209
+    80)  203 207 204 208 205 209 206 210
+    81)  204 208 205 209 206 210 207 211
+    82)  205 209 206 210 207 211 208 212
+    83)  206 210 207 211 208 212 209 213
+    84)  207 211 208 212 209 213 210 214
+    85)  208 212 209 213 210 214 211 215
+    86)  209 213 210 214 211 215 212 216
+    87)  210 214 211 215 212 216 213 217
+    88)  211 215 212 216 213 217 214 218
+    89)  212 216 213 217 214 218 215 219
+    90)  213 217 214 218 215 219 216 220
+    91)  214 218 215 219 216 220 217 221
+    92)  215 219 216 220 217 221 218 222
+    93)  216 220 217 221 218 222 219 223
+    94)  217 221 218 222 219 223 220 224
+    95)  218 222 219 223 220 224 221 225
+    96)  219 223 220 224 221 225 222 226
+    97)  220 224 221 225 222 226 223 227
+    98)  221 225 222 226 223 227 224 228
+    99)  222 226 223 227 224 228 225 229
+
+
+                                == TEST DATA BUFFERS Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 2 - GET STATUS AND DEBUG
+
+--Copying and transferring structure set...
+--Post function loop...
+    DSP_STAT Structure Contents
+state      : 0
+status     : 0
+num_levels : 2
+trace[0]  : main 
+trace[1]  : dispatch <--
+trace[2]  : float_err_check 
+trace[3]  : add_debug 
+trace[4]  :  
+trace[5]  :  
+trace[6]  :  
+trace[7]  :  
+trace[8]  :  
+trace[9]  :  
+trace[10]  :  
+trace[11]  :  
+trace[12]  :  
+trace[13]  :  
+trace[14]  :  
+---------------------------------------------------
+    DSP_DEBUG Structure Contents
+write_ptr: 12
+Entry   FID   Value
+  0)         test_raw_data	   111		220)                      	     0		440)                      	     0
+  1)         test_raw_data	    10		221)                      	     0		441)                      	     0
+  2)         test_raw_data	    10		222)                      	     0		442)                      	     0
+  3)         test_raw_data	    10		223)                      	     0		443)                      	     0
+  4)         test_raw_data	    10		224)                      	     0		444)                      	     0
+  5)         test_raw_data	    10		225)                      	     0		445)                      	     0
+  6)         test_raw_data	    10		226)                      	     0		446)                      	     0
+  7)         test_raw_data	    10		227)                      	     0		447)                      	     0
+  8)         test_raw_data	    10		228)                      	     0		448)                      	     0
+  9)         test_raw_data	    10		229)                      	     0		449)                      	     0
+ 10)         test_raw_data	    10		230)                      	     0		450)                      	     0
+ 11)         test_raw_data	   111		231)                      	     0		451)                      	     0<--
+ 12)                      	     0		232)                      	     0		452)                      	     0
+ 13)                      	     0		233)                      	     0		453)                      	     0
+ 14)                      	     0		234)                      	     0		454)                      	     0
+ 15)                      	     0		235)                      	     0		455)                      	     0
+ 16)                      	     0		236)                      	     0		456)                      	     0
+ 17)                      	     0		237)                      	     0		457)                      	     0
+ 18)                      	     0		238)                      	     0		458)                      	     0
+ 19)                      	     0		239)                      	     0		459)                      	     0
+ 20)                      	     0		240)                      	     0		460)                      	     0
+ 21)                      	     0		241)                      	     0		461)                      	     0
+ 22)                      	     0		242)                      	     0		462)                      	     0
+ 23)                      	     0		243)                      	     0		463)                      	     0
+ 24)                      	     0		244)                      	     0		464)                      	     0
+ 25)                      	     0		245)                      	     0		465)                      	     0
+ 26)                      	     0		246)                      	     0		466)                      	     0
+ 27)                      	     0		247)                      	     0		467)                      	     0
+ 28)                      	     0		248)                      	     0		468)                      	     0
+ 29)                      	     0		249)                      	     0		469)                      	     0
+ 30)                      	     0		250)                      	     0		470)                      	     0
+ 31)                      	     0		251)                      	     0		471)                      	     0
+ 32)                      	     0		252)                      	     0		472)                      	     0
+ 33)                      	     0		253)                      	     0		473)                      	     0
+ 34)                      	     0		254)                      	     0		474)                      	     0
+ 35)                      	     0		255)                      	     0		475)                      	     0
+ 36)                      	     0		256)                      	     0		476)                      	     0
+ 37)                      	     0		257)                      	     0		477)                      	     0
+ 38)                      	     0		258)                      	     0		478)                      	     0
+ 39)                      	     0		259)                      	     0		479)                      	     0
+ 40)                      	     0		260)                      	     0		480)                      	     0
+ 41)                      	     0		261)                      	     0		481)                      	     0
+ 42)                      	     0		262)                      	     0		482)                      	     0
+ 43)                      	     0		263)                      	     0		483)                      	     0
+ 44)                      	     0		264)                      	     0		484)                      	     0
+ 45)                      	     0		265)                      	     0		485)                      	     0
+ 46)                      	     0		266)                      	     0		486)                      	     0
+ 47)                      	     0		267)                      	     0		487)                      	     0
+ 48)                      	     0		268)                      	     0		488)                      	     0
+ 49)                      	     0		269)                      	     0		489)                      	     0
+ 50)                      	     0		270)                      	     0		490)                      	     0
+ 51)                      	     0		271)                      	     0		491)                      	     0
+ 52)                      	     0		272)                      	     0		492)                      	     0
+ 53)                      	     0		273)                      	     0		493)                      	     0
+ 54)                      	     0		274)                      	     0		494)                      	     0
+ 55)                      	     0		275)                      	     0		495)                      	     0
+ 56)                      	     0		276)                      	     0		496)                      	     0
+ 57)                      	     0		277)                      	     0		497)                      	     0
+ 58)                      	     0		278)                      	     0		498)                      	     0
+ 59)                      	     0		279)                      	     0		499)                      	     0
+ 60)                      	     0		280)                      	     0		500)                      	     0
+ 61)                      	     0		281)                      	     0		501)                      	     0
+ 62)                      	     0		282)                      	     0		502)                      	     0
+ 63)                      	     0		283)                      	     0		503)                      	     0
+ 64)                      	     0		284)                      	     0		504)                      	     0
+ 65)                      	     0		285)                      	     0		505)                      	     0
+ 66)                      	     0		286)                      	     0		506)                      	     0
+ 67)                      	     0		287)                      	     0		507)                      	     0
+ 68)                      	     0		288)                      	     0		508)                      	     0
+ 69)                      	     0		289)                      	     0		509)                      	     0
+ 70)                      	     0		290)                      	     0		510)                      	     0
+ 71)                      	     0		291)                      	     0		511)                      	     0
+ 72)                      	     0		292)                      	     0		512)                      	     0
+ 73)                      	     0		293)                      	     0		513)                      	     0
+ 74)                      	     0		294)                      	     0		514)                      	     0
+ 75)                      	     0		295)                      	     0		515)                      	     0
+ 76)                      	     0		296)                      	     0		516)                      	     0
+ 77)                      	     0		297)                      	     0		517)                      	     0
+ 78)                      	     0		298)                      	     0		518)                      	     0
+ 79)                      	     0		299)                      	     0		519)                      	     0
+ 80)                      	     0		300)                      	     0		520)                      	     0
+ 81)                      	     0		301)                      	     0		521)                      	     0
+ 82)                      	     0		302)                      	     0		522)                      	     0
+ 83)                      	     0		303)                      	     0		523)                      	     0
+ 84)                      	     0		304)                      	     0		524)                      	     0
+ 85)                      	     0		305)                      	     0		525)                      	     0
+ 86)                      	     0		306)                      	     0		526)                      	     0
+ 87)                      	     0		307)                      	     0		527)                      	     0
+ 88)                      	     0		308)                      	     0		528)                      	     0
+ 89)                      	     0		309)                      	     0		529)                      	     0
+ 90)                      	     0		310)                      	     0		530)                      	     0
+ 91)                      	     0		311)                      	     0		531)                      	     0
+ 92)                      	     0		312)                      	     0		532)                      	     0
+ 93)                      	     0		313)                      	     0		533)                      	     0
+ 94)                      	     0		314)                      	     0		534)                      	     0
+ 95)                      	     0		315)                      	     0		535)                      	     0
+ 96)                      	     0		316)                      	     0		536)                      	     0
+ 97)                      	     0		317)                      	     0		537)                      	     0
+ 98)                      	     0		318)                      	     0		538)                      	     0
+ 99)                      	     0		319)                      	     0		539)                      	     0
+100)                      	     0		320)                      	     0		540)                      	     0
+101)                      	     0		321)                      	     0		541)                      	     0
+102)                      	     0		322)                      	     0		542)                      	     0
+103)                      	     0		323)                      	     0		543)                      	     0
+104)                      	     0		324)                      	     0		544)                      	     0
+105)                      	     0		325)                      	     0		545)                      	     0
+106)                      	     0		326)                      	     0		546)                      	     0
+107)                      	     0		327)                      	     0		547)                      	     0
+108)                      	     0		328)                      	     0		548)                      	     0
+109)                      	     0		329)                      	     0		549)                      	     0
+110)                      	     0		330)                      	     0		550)                      	     0
+111)                      	     0		331)                      	     0		551)                      	     0
+112)                      	     0		332)                      	     0		552)                      	     0
+113)                      	     0		333)                      	     0		553)                      	     0
+114)                      	     0		334)                      	     0		554)                      	     0
+115)                      	     0		335)                      	     0		555)                      	     0
+116)                      	     0		336)                      	     0		556)                      	     0
+117)                      	     0		337)                      	     0		557)                      	     0
+118)                      	     0		338)                      	     0		558)                      	     0
+119)                      	     0		339)                      	     0		559)                      	     0
+120)                      	     0		340)                      	     0		560)                      	     0
+121)                      	     0		341)                      	     0		561)                      	     0
+122)                      	     0		342)                      	     0		562)                      	     0
+123)                      	     0		343)                      	     0		563)                      	     0
+124)                      	     0		344)                      	     0		564)                      	     0
+125)                      	     0		345)                      	     0		565)                      	     0
+126)                      	     0		346)                      	     0		566)                      	     0
+127)                      	     0		347)                      	     0		567)                      	     0
+128)                      	     0		348)                      	     0		568)                      	     0
+129)                      	     0		349)                      	     0		569)                      	     0
+130)                      	     0		350)                      	     0		570)                      	     0
+131)                      	     0		351)                      	     0		571)                      	     0
+132)                      	     0		352)                      	     0		572)                      	     0
+133)                      	     0		353)                      	     0		573)                      	     0
+134)                      	     0		354)                      	     0		574)                      	     0
+135)                      	     0		355)                      	     0		575)                      	     0
+136)                      	     0		356)                      	     0		576)                      	     0
+137)                      	     0		357)                      	     0		577)                      	     0
+138)                      	     0		358)                      	     0		578)                      	     0
+139)                      	     0		359)                      	     0		579)                      	     0
+140)                      	     0		360)                      	     0		580)                      	     0
+141)                      	     0		361)                      	     0		581)                      	     0
+142)                      	     0		362)                      	     0		582)                      	     0
+143)                      	     0		363)                      	     0		583)                      	     0
+144)                      	     0		364)                      	     0		584)                      	     0
+145)                      	     0		365)                      	     0		585)                      	     0
+146)                      	     0		366)                      	     0		586)                      	     0
+147)                      	     0		367)                      	     0		587)                      	     0
+148)                      	     0		368)                      	     0		588)                      	     0
+149)                      	     0		369)                      	     0		589)                      	     0
+150)                      	     0		370)                      	     0		590)                      	     0
+151)                      	     0		371)                      	     0		591)                      	     0
+152)                      	     0		372)                      	     0		592)                      	     0
+153)                      	     0		373)                      	     0		593)                      	     0
+154)                      	     0		374)                      	     0		594)                      	     0
+155)                      	     0		375)                      	     0		595)                      	     0
+156)                      	     0		376)                      	     0		596)                      	     0
+157)                      	     0		377)                      	     0		597)                      	     0
+158)                      	     0		378)                      	     0		598)                      	     0
+159)                      	     0		379)                      	     0		599)                      	     0
+160)                      	     0		380)                      	     0		600)                      	     0
+161)                      	     0		381)                      	     0		601)                      	     0
+162)                      	     0		382)                      	     0		602)                      	     0
+163)                      	     0		383)                      	     0		603)                      	     0
+164)                      	     0		384)                      	     0		604)                      	     0
+165)                      	     0		385)                      	     0		605)                      	     0
+166)                      	     0		386)                      	     0		606)                      	     0
+167)                      	     0		387)                      	     0		607)                      	     0
+168)                      	     0		388)                      	     0		608)                      	     0
+169)                      	     0		389)                      	     0		609)                      	     0
+170)                      	     0		390)                      	     0		610)                      	     0
+171)                      	     0		391)                      	     0		611)                      	     0
+172)                      	     0		392)                      	     0		612)                      	     0
+173)                      	     0		393)                      	     0		613)                      	     0
+174)                      	     0		394)                      	     0		614)                      	     0
+175)                      	     0		395)                      	     0		615)                      	     0
+176)                      	     0		396)                      	     0		616)                      	     0
+177)                      	     0		397)                      	     0		617)                      	     0
+178)                      	     0		398)                      	     0		618)                      	     0
+179)                      	     0		399)                      	     0		619)                      	     0
+180)                      	     0		400)                      	     0		620)                      	     0
+181)                      	     0		401)                      	     0		621)                      	     0
+182)                      	     0		402)                      	     0		622)                      	     0
+183)                      	     0		403)                      	     0		623)                      	     0
+184)                      	     0		404)                      	     0		624)                      	     0
+185)                      	     0		405)                      	     0		625)                      	     0
+186)                      	     0		406)                      	     0		626)                      	     0
+187)                      	     0		407)                      	     0		627)                      	     0
+188)                      	     0		408)                      	     0		628)                      	     0
+189)                      	     0		409)                      	     0		629)                      	     0
+190)                      	     0		410)                      	     0		630)                      	     0
+191)                      	     0		411)                      	     0		631)                      	     0
+192)                      	     0		412)                      	     0		632)                      	     0
+193)                      	     0		413)                      	     0		633)                      	     0
+194)                      	     0		414)                      	     0		634)                      	     0
+195)                      	     0		415)                      	     0		635)                      	     0
+196)                      	     0		416)                      	     0		636)                      	     0
+197)                      	     0		417)                      	     0		637)                      	     0
+198)                      	     0		418)                      	     0		638)                      	     0
+199)                      	     0		419)                      	     0		639)                      	     0
+200)                      	     0		420)                      	     0		640)                      	     0
+201)                      	     0		421)                      	     0		641)                      	     0
+202)                      	     0		422)                      	     0		642)                      	     0
+203)                      	     0		423)                      	     0		643)                      	     0
+204)                      	     0		424)                      	     0		644)                      	     0
+205)                      	     0		425)                      	     0		645)                      	     0
+206)                      	     0		426)                      	     0		646)                      	     0
+207)                      	     0		427)                      	     0		647)                      	     0
+208)                      	     0		428)                      	     0		648)                      	     0
+209)                      	     0		429)                      	     0		649)                      	     0
+210)                      	     0		430)                      	     0		650)                      	     0
+211)                      	     0		431)                      	     0		651)                      	     0
+212)                      	     0		432)                      	     0		652)                      	     0
+213)                      	     0		433)                      	     0		653)                      	     0
+214)                      	     0		434)                      	     0		654)                      	     0
+215)                      	     0		435)                      	     0		655)                      	     0
+216)                      	     0		436)                      	     0		656)                      	     0
+217)                      	     0		437)                      	     0		657)                      	     0
+218)                      	     0		438)                      	     0		658)                      	     0
+219)                      	     0		439)                      	     0		659)                      	     0
+
+                                == GET STATUS AND DEBUG Command Status Summary ==
+
+ Instrument    Location    Active            Status           | Instrument    Location    Active            Status           |
+--------------------------------------------------------------|--------------------------------------------------------------|
+  ctacf074      8AW          *     (0) SUCCESS                |
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: 
+
+Executing command: 36 - EXIT
+
+Closing instrument sockets... done.
+debug level = 0, gui flag = 0, maint mode = 0 
+
+GTK+ Initialization successful.
+
+Using default application config file './cbic.conf'.
+Reading application configuration...
+Setting primary communications method to  ETHERNET 
+Timing setup taken from config file: (5) 14ns_FIX_G 
+Attempting connection to MPMnet manager...
+Mnet_connect call returned : 1
+Looking in file /nfs/cesr/online/instr/CBPM/allocation/Instrument_allocations
+Reading in the allocation  "Custom:mgs9-third" ... done.
+
+This program instance will become server ID [29] if placed in server mode.
+
+
+Number of instruments requested = 1
+
+
+
+----------------------------------------------------------------------
+Reading general instrument parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading location-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Reading instrument-specific parameters for all requested instruments...
+----------------------------------------------------------------------
+Reading instrument-dependent parameters for: BPM_8AW
+Stopping faccess() session...
+
+
+
+----------------------------------------------------------------------
+Loading the Instrument Code parameters to all requested instruments...
+----------------------------------------------------------------------
+
+
+ *********************************************** 
+     New Time Scan Diagnostics Enabled  
+ ***********************************************
+
+
+
+-------- Verifying connectivity for instrument ctacf074 --------
+ CBPM PKT ALL  101, Ping test to [ctacf074]...OK, Read IDENT via ETHERNET,    Identification Read [32;1mOK[0m 
+
+
+ 1 Instrument is ONLINE.
+
+Location     = 8AW
+Checking communications structure versions for instrument <ctacf074>...
+EXE Name = CBPM_II.ldr
+Setting up and activating BPM  ctacf074 (192.168.32.124 )  @  CBPM PKT ALL 101 
+Initializing active gain setting to '-1'
+Sending all: phase, pedestal, gain configuration, and timing configuration settings. 
+Commanding gain and timing setup settings...
+<ctacf074>   CMD_DONE  (3)
+OP TIMING SETUP VALUE = 5 [14ns_FIX_G]
+Block delays = 895   303
+<ctacf074>   CMD_DONE  (3)
+gain setting = 0  (gain code = 0)
+Sending all code parameters...
+Final timing setup = 5 [14ns_FIX_G]
+
+
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: [H[2J      Location      Hostname    IP Address        Timing   XBUS Node        Module Type        FE-FPGAs     BUILD ID  
+               Active                           HB  |                  Ele.           DB-FPGA                          Timing Setup
+------------------------------------------------------------------------------------------------------------------------------------
+  1)   8AW       *  ctacf074   192.168.32.124   OK  OK   CBPM PKT ALL  101    BPM W/FE   5.8   47,47,47,47  1206251103      14ns_FIX_G 
+
+Instrument activation:  (a)ll, (n)one, (r)ange toggle, (i)nvert all, (s)ingle toggle, (q)uit : [q]: 
+Prep() function status = 0
+
+
+Begin post-command status check/recovery...
+
+
+
+
+
+                      v1.10.3
+
+-----------------------------
+  Commanding  1  BPM  
+    of  1  online.
+-----------------------------
+  0) FIND bTMD
+  1) FIND BUNCH
+  2) GET STATUS AND DEBUG
+  3) TEST DATA BUFFERS
+  4) GET TURN-BY-TURN DATA
+  5) GET PROCESSED DATA
+  6) MEASURE 4ns BUNCH CURRENTS
+  7) FIND cTMD
+  8) GET BETATRON PHASE
+  9) SAVE TIMING PARAMETERS
+ 10) SAVE PEDESTAL PARAMETERS
+ 11) TIME SCAN
+ 12) SET GAINS
+ 13) GET TEMPERATURES
+ 14) REREAD PARAMETER FILES
+ 15) SELECT ACTIVE INSTRUMENTS
+ 16) IDLE COMMAND
+ 17) ENTER SERVER MODE
+ 18) DUMP MPM INTERFACE STRUCTURE
+ 19) ACQUIRE PEDESTALS
+ 20) DUMP RAW DATA
+ 21) CHECK PULSE
+ 22) SET TIMING SETUP
+ 23) INSTALL UPDATED PARAMETERS
+ 24) RESET COLDFIRE
+ 25) PROGRAM FLASH
+ 26) RESET AND INIT
+ 27) POWER CYCLE - RESET AND INIT
+ 28) TIME-IN
+ 29) INSTALL ELECTRONIC GAIN CORRECTIONS
+ 30) APPLY GAIN MAPPING CORRECTIONS
+ 31) COMPOSE BUNCH PATTERN
+ 32) Clear Debug Struct
+ 33) SCRUB TIMING PARAMS
+ 34) COPY TIMING PARAMS A-->B
+ 35) Diagnostic Dump
+ 36) EXIT
+ 37) Enable FG Zero-Crossing Sample Point
+ 38) Install Turn-By-Turn Bunch Pattern
+ 39) Test Life
+ 40) Calibrate 4ns BUNCH CURRENTS
+---------------------------
+Enter action: Closing instrument sockets... done.
+Mon Jun 25 11:59:33 EDT 2012
+Test Everything Complete

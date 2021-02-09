@@ -1,0 +1,39 @@
+This is the source tree for the
+ Cornell Beam Instrumentation Control (CBIC) library and
+ application.
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Requirements of the CBIC library
+
+Accelerator Libraries:
+-----------------------
+mpmnet
+CBInet
+BeamInstSupport
+CBPM-TSHARC
+cesr_utils
+c_utils
+
+To be Optional:
+----------------
+GTK+ 2.0
+
+3rd-party applications:
+-----------------------
+Gnuplot
+
+
+
+Subdirectories in this project area:
+--------------------------------------
+main - Holds
+         main routine for the primary CBIC control application
+         main routine for simple instrument acquisition triggering program
+         
+management - Communication verification code
+
+system - Code for general application state and mode management/control
+
+util - Miscellaneous utility routines
+
+

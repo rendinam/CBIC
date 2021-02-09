@@ -1,0 +1,756 @@
+
+BeamInstSupport Library, CBPM-TSHARC, &
+CBIC Library/Application Aggregate Changelog   
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  Version numbers are <major>.<minor>.<patch>
+    Minor versions change to signify an incompatibility in communication
+     structure defintions between releases that must be addressed with
+     updated (re-flashed) instrument software.
+    Point releases are for changes less disruptive than that.
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+v1.5.4   --  -2011    <mcr> -- mcr38@cornell.edu
+               == General Changes ==
+- New instrument executable built and installed.  
+  Version ID = 1106231257
+
+                  == Bugfixes ==
+- Corrected fencepost error in the rotate_block_bunch_pattern() function of
+  the instrument program code that caused one less bunch than was correct
+  to be reported as having wrapped in bunch patterns that wrap back to the
+  beginning of the bunch pattern registers.
+
+- Fixed error in instrument code causing invalid handshakes to be returned for
+  every eighth turn-by-turn measurement in variable-gain modes only.  This
+  was related to error flagging function in the instrument code.  The problem
+  locations in the get_raw_data call chain have been excised, but a
+  re-examination / refactoring of the error trapping and classification
+  mechanisms is in order.
+
+------------------------------------------------------------------------------
+
+v1.5.3   -- 13-Jun-2011    <mcr> -- mcr38@cornell.edu
+                  == Bugfixes ==
+- 4ns bunch-by-bunch current monitor command fixed to correctly honor all
+  possible CESR polarity transitions by changing monitoring state accordingly.
+
+               == Feature Additions ==
+- Pre-publishing magnitude checking implemented for betatron phase 
+  angles/amplitudes and button values for betatron phase command.
+  If values fall outside acceptable range, an error is thrown and the values
+  are not published to the CESR MPM.
+
+- Pre-publishing button magnitude checking implemented for orbit command.
+  If values fall outside acceptable range, an error is thrown and the values
+  are not published to the CESR MPM.
+
+- Diagnostic dump command added to main menu to allow for formatted dumping
+  of all communication structure contents (except the large front-end data
+  buffers, unless explicitly requested, for speed reasons) and all front-end
+  registers to disk for perusal.  This is meant to be used in the event an
+  instrument is found in an improper state.  The dump can be performed before
+  the usual ameliorative power cycle to try and correlate internal state to
+  the bad behavior.
+
+- Added menu command "Enable FG Zero-Crossing Sample Point" to allow for
+  shifting block delays to relocate the sample point of all active instruments
+  from the peak of the waveform to close to the zero-amplitude crossing point
+  for timing jitter studies.  Command is primitive in that it does not yet
+  provide a way to shift the delays back to their original state.  A program
+  restart is presently required to do this.
+
+------------------------------------------------------------------------------
+
+v1.5.2   --  18-Apr-2011    <mcr> -- mcr38@cornell.edu
+               == Feature Additions ==
+- Additional prompts added to the "apply gain mapping correction" command
+  to allow for controlling how gain scale factors are applied to an
+  an intermediate parameter file prior to installation.
+   1) Multiply existing gain scale factors by those found in the gain mapping
+      input file.
+   2) Replace the existing gain scale factors with those found in the gain
+      mapping input file.  This also prompts for species so as not to
+      overwrite existing scale factors for the timing block not being updated.
+
+------------------------------------------------------------------------------
+
+v1.5.1   --  17-Apr-2011    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Additional diagnostic output added for command dispatch and processing
+
+- Timing setup names explicitly include a 'VAR_G' or 'FIX_G' component to
+  remove ambiguity in requested timing setup gain regime
+
+- Improved current monitor measurement termination mechanism.  No longer
+  susceptible to conflicts when interrupting CBInet data transfers.
+
+- Pedestal table composition bug resulting in inflated pedestal amplitudes
+  for non-4ns-e+ timing setups fixed.
+
+               == General Changes ==
+- New instrument executable built and installed.  
+  Version ID = 1102281008
+
+- File input API documentation for developers is now available in the 
+  CBPM-TSHARC/doc directory.
+
+               == Feature Additions ==
+- New menu command added to allow reconfiguration of instrument parameters
+  by re-reading the instrument parameter file specified in the application
+  config file and re-sending them down to selected instruments.  This allows
+  manual adjustment or resetting of instrument parameters without restarting
+  the application.
+
+- Arbitrary (14ns) bunch betatron phase measurements are supported for all
+  bunches up to bunch 75 via new turns offset accounting system evident in
+  the master BPM parameter file.
+
+- Substantial refinements and expansion of new version 3 raw data file format
+  and developer APIs for C and Fortran.
+   o The API supports retrieving data file by index alone via examination of
+     CESR online and OFFLINE data areas as well as retrieval via full path
+     name of a data file.
+
+- Example programs provided for testing the C- and Fortran-Language file input
+  APIs
+
+- Operations support scripts added to revision control.
+    start_BPM_server - For bringing up the standard BPM servers
+    start_CURRMON    - For bringing up the 4ns bunch-by-bunch current monitor
+
+- Stand-alone RAW data file merge utility provided for creating a single
+  unified RAW data file out of separate files generated from a single 
+  instrument by decoupled West and East BPM server instances.
+
+- Data file down-conversion program provided to convert the canonical raw
+  data file format (RD_V3) to the old (RD_V1) format so as to temporarily 
+  maintain compatibilty with 3rd party tools that depend on the older format.
+
+- Automatically-generated communication structure dumping functions now
+  provided when communication data structure code and headers are generated.
+  Will be part of expanded diagnostic capability.
+
+------------------------------------------------------------------------------
+
+v1.5.0   --   10-Sep-2010    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Some minor user interface and informational output corrections for clarity.
+
+               == General Changes ==
+- New instrument executable built and installed.  
+  Version ID = 1009081113
+
+           == Performance Optimizations ==
+- Betatron phase measurements now only calculate and report the angle
+  calculation coefficients for the predetermined 1/2-turn wait state and
+  turns offset value pair found during installation and configuration.  This
+  greatly speeds up the measurement of betatron phase advance angles.
+
+               == Feature Additions ==
+- 4ns bunch-by-bunch current monitor behavior adjusted to print out to 
+  the terminal the gain setting transitions as they are performed during
+  the measurement loop.
+
+- New data file format introduced along with file I/O routines for 3rd-party
+  use.  
+         The data file format "RDe-..." will still be generated alongside
+  the new data file whenever a turn-by-turn or raw measurement is carried out.
+  Eventually, this RDe format will be deprecated entirely.
+  
+- New file input routines for 3rd-party developer use are available for the 
+  C language.
+  See data file input API documentation for detailed usage notes.
+
+------------------------------------------------------------------------------
+
+v1.4.7   --   24-Jul-2010    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Commands reqested in server mode now fall back to a sensible default for
+  number of turns if the value provided via the CESR MPM control 
+  (CBPM CONTROL) arrays is either unitialized or otherwise invalid.
+
+               == General Changes ==
+- General usability adjustments and terminal output clarifications.
+
+           == Performance Optimizations ==
+- Changed order of events for command processing in server mode.  In the event
+  an instrument needs to be put through a recovery procedure, this will now
+  happen after the command completion notice is sent to the requesting client
+  to decrease the wait time for confirmed data delivery in the event a subset
+  of instruments needs to be reinitialized due to failure.
+  NOTE: In a multi-server setup, in the event of a recovery process being 
+        initiated on one server, the other server will typically be in a
+        receptive state for commands and will honor them, while the other
+        server ignores them.
+
+------------------------------------------------------------------------------
+
+v1.4.6   --   14-Jul-2010    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Improvements to reliability and recovery robustness and speed.  Eliminated 
+  socket close operations to instruments that may not have sockets opened to
+  them under certain circumstances to prevent socket close error messages.
+
+- Improved descriptiveness of command sub-function failure error messages.
+
+- Added missing error code processing that was causing the nonspecific 
+  "plain old error" message when certain combinations of communication errors
+  were encountered so that the specific error condition is now trapped and 
+  handled.
+
+------------------------------------------------------------------------------
+
+v1.4.5   --   2-Jul-2010    <mcr> -- mcr38@cornell.edu
+
+               == General Changes ==
+- Extended turn-by-turn data file format adjusted slightly to now include
+  an explicit mention of the number of bunches in addition to the bunch
+  pattern definition itself in the file header.
+
+                  == Bugfixes ==
+- Typo in instrument headers of data files "Numer of turns" is now
+  "Number of turns".
+
+- Fixed instrument selection by range indexing bug.
+
+               == Feature Additions ==
+- New, standardized commands for installing new electronic gain corrections 
+  and applying gain mapping corrections to existing gain factor tables.
+
+- Improved terminal printout in several locations for better timestamping
+  in any log files created as part of operations running.
+
+- Orbit measurements now publish to the new 'BPM ORB DATA' node with button
+  values and calculated positions in addition to the old locations.
+
+- Betatron phase measurements now publish to the new 'BPM PHA DATA' with 
+  horizontal and vertical amplitudes and phases.
+
+- A simple turn-by-turn data file reading routine is provided.  It allows
+  one to read in all instruments, bunches, and turns worth of button and 
+  position data from an 'RDe'-type data file into a caller-provided array
+  of floats.
+  See the header documentation of the file 
+  CBPM-TSHARC/file_io/cbpm_read_tbt_data.c for complete usage information.
+
+           == Performance Optimizations ==
+- Forced flushing of terminal output in strategic spots to provide more rapid
+  update of display when using standard output redirection for logging
+  purposes.
+
+------------------------------------------------------------------------------
+
+v1.4.4   --   15-Jun-2010    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Added additional fault checking to improve stability in orbit monitoring.
+
+               == Feature Additions ==
+- Two-tier mode handles intelligent management of instrument sets across
+  multiple back-ends.
+
+- Better single-point failure handling in command handshake check.  Will no 
+  longer wait for multiple instruments to experience the full timeout period,
+  performs a rapid check on remaining instruments after any one instrument 
+  times out.
+
+------------------------------------------------------------------------------
+
+v1.4.3   --   8-Jun-2010    <mcr> -- mcr38@cornell.edu
+
+                  == Bugfixes ==
+- Fixed buggy error text display for XBUS communication structure transfer 
+  operations.
+
+- Instruments that fail a command execution because of poor timing integrity
+  will be disabled at the end of an (otherwise successful) reset and 
+  re-initialization recovery process to prevent repeated recovery requests
+  for that instrument.
+
+               == Feature Additions ==
+- Turn-by-turn data requests honor the number of turns specified in the
+  cbpm_request and consequently copied to the control mailbox arrays instead
+  of the prior hardcoded 1024 turn limit.
+
+           == Performance Optimizations ==
+- Centralized management of CBInet socket communication to instruments.  This
+  cuts down on the number of socket open and close events, speeding up 
+  operation and aiding consistency and reliability.
+
+- Commands now allow for a parallel post() function mode that greatly speeds
+  up data delivery by transferring data from multiple instruments 
+  simultaneously.  Usage notes are provided for this mode as some requirements
+  for the construction of post() functions that shall take advantage of this
+  mode must be followed for proper operation.
+
+------------------------------------------------------------------------------
+
+v1.4.2   --  25-May-2010    <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Communication problems during startup will result in an instrument being
+  deactivated entirely instead of being placed into maintenance level 1,
+  which would still cause it to receive command requests, often slowing
+  down measurements needlessly.
+
+- Recovery procedure from a communications problem or command handshake
+  timeout during a command execution now only reactivates the instruments
+  that were active at the time of the failure and not all instruments online
+  as it did previously.
+
+------------------------------------------------------------------------------
+
+v1.4.1   -- 19-May-2010    <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Averaged button data gets corrected appropriately now at the right stage 
+  of events to make the quotients sensible as the output of a measurement
+  whether or not jitter suppression is enabled.
+
+------------------------------------------------------------------------------
+
+v1.4.0   -- 13-May-2010    <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Betatron phase measurements now allow for full triggering with enable
+  request.
+
+               == Feature Additions ==
+- A turns counter summary is provided for select commands.  At the moment,
+  only processed data acquisitions show this table of active instruments
+  and the value their internal turn counter register had at the moment the
+  acquisition was started.
+
+- Turn by turn data file instrument header has been expanded to include
+  additional vital information about each measurement.  This is provided in
+  a supplementary 'Raw Data - Extended' file _alongside_ the traditionally
+  formatted RD-XXXXX.dat file and has a RDe-XXXXX.dat filename.  It will 
+  eventually supercede the traditional format to become the standard
+  turn-by-turn data file format.
+
+- Now performs a turn counter synchronization on all powered instruments 
+  whenever any instrument is power-cycled via the control application.
+
+- Betatron phase command also provides simple averaged data output to the
+  traditional orbit button data node in the CESR database.
+  
+           == Performance Optimizations ==
+- Betatron phase command now allows two modes of operation:
+  1) Compute phase tables mode - will construct coefficients for every 
+    'phase race wait' and 'turns offset' parameter combination.
+  2) Report phase only mode - this will skip the generation of the phase
+     tables since the appropriate race wait and turns offset values will 
+     already have been determined for the given location.  Much faster, as
+     it minimizes the number of ADC buffer accesses and does not write
+     anything to disk.
+
+------------------------------------------------------------------------------
+
+v1.3.1   -- 5-May-2010    <mcr> -- mcr38@cornell.edu
+
+               == Feature Additions ==
+- More robust and rapid management of instrument communication status, power 
+  supply, and processor state upon application startup.
+
+------------------------------------------------------------------------------
+
+v1.3.0   -- 24-Mar-2010    <mcr> -- mcr38@cornell.edu
+
+               == General Changes ==
+- First release after _major_ code refactoring/reorganization. Library
+  hierarchy reworked to allow generalization to higher channel-count
+  devices such as BSMs.
+
+- Strict naming conventions applied to all instrumentation code.
+
+                  ==  Bugfixes ==
+- Various housekeeping changes, tweaks and the like, too numerous to mention.
+  See the repository commit logs for a detailed account.
+ 
+------------------------------------------------------------------------------
+
+v1.2.17  -- 24-Mar-2010    <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Disabled some incomplete code for orbit data block transfer preparation.
+
+               == Feature Additions ==
+- Species can now be specified in bunch pattern composition GUI for 14ns
+  patterns.
+ 
+------------------------------------------------------------------------------
+
+v1.2.16  -- 5-Mar-2010    <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Removed vestigial portion of mechanism responsible for de-asserting the
+  data enable bit.  It was causing multiple instrument timeouts on a server
+  that experiences an instrument communications failure in a multiple CBPM_II 
+  server arrangement.
+
+------------------------------------------------------------------------------
+
+v1.2.15  -- 3-Mar-2010    <mcr> -- mcr38@cornell.edu
+
+               == General Changes ==
+- Master parameter file broken out into a detector (location)-specific
+  file and an instrument-specific file.
+
+                  ==  Bugfixes ==
+- Fixed never saving timing parameters regardless of prompt response at
+  conclusion of time_in command.
+
+               == Feature Additions ==
+- New instrument allocation system.  Allows one to define a named scheme
+  of allocations of instruments to a series of server instances.  Allows
+  for the simple assignment of a particular allocation of instruments to
+  a program instance via command-line argument.
+
+           == Performance Optimizations ==
+- Instrument-specific and detector-specific parameter file I/O has been
+  optimized for much faster operation.  This results in a much faster
+  startup time and saving of intermediate parameter files.
+
+------------------------------------------------------------------------------
+
+v1.2.14  --  17-Feb-2010   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Fixed input prompt processor being called too late in progression of 
+  raw_data_prep.  Trigger request is not honored.
+
+- Fixed assignment omission preventing proper bucket being chosen when
+  performing a time scan on an electron bunch.
+
+------------------------------------------------------------------------------
+
+v1.2.13  --  9-Feb-2010   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Command copy_timing_params now properly preserves timing setup state.
+
+- Changing length of mastser platform command list no longer has the 
+  potential to break availability of server-mode commands.
+
+               == Feature Additions ==
+- New user input prompting system.  Allows configurable default values and
+  input validation.
+
+------------------------------------------------------------------------------
+
+v1.2.12  --  22-Jan-2010   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Processed data via 3rd party request (CESRV, etc) now performs
+  pedestal subtraction AND gain scaling of processed data by default.
+
+- Instrument reset command now properly toggles the instrument's digital
+  board reset pin, waits for boot, pushes complete configuration info to
+  the instrument, and then sets the timing setup when invoked from the
+  main menu OR from an automatic instrument recovery.
+
+- Temporary addition of gain table installation command/tool.  Added to
+  main menu for speed of implementation.  When time allows, will be
+  broken out into a standalone tool.
+
+- Processed data (orbit) corruption on measurements that cause a gain
+  setting transition addressed.
+
+               == Feature Additions ==
+- First pass at continuous processed data mode added.  Similar to the 4ns
+  current monitor mode, it commands a collection of instruments to 
+  continuously acquire some number of turns of data, process it, and
+  publish the results (button averages and X, Y positions) to the MPM 
+  database.  The updated instrument (DSP) code build for this version must 
+  be loaded to use this feature.
+
+- Expanded support for maintenance mode flag and parameter in command-line
+  options.  Maintenance mode 3 avoids communication with instruments to
+  allow for low-level maintenance operations.  See command line help for
+  details and usage.
+
+- Power cycle and power cycle with reset and initialization commands
+  added.  This allows targetted power cycling and initialization on an 
+  individual instrument basis.
+
+------------------------------------------------------------------------------
+
+v1.2.11  --  13-Jan-2010   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Changed polling frequency in DSP code of front-end cards for done bit 
+  status to once per turn.  This was tested and appears to have elminated 
+  the variation of command handshake return times and all instances of 
+  previously unexplained handshake timeouts.
+
+- Possibly related to above, took into account rollover of digital board
+  turns counter register in low-level data acquisition routine.
+
+------------------------------------------------------------------------------
+
+v1.2.10  --  7-Jan-2010   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Two-tier operation bug that prevented proper socket and file pointer
+  closing fixed.
+
+               == Feature Additions ==
+- Graphical bunch pattern composition tool added.  Allows for creation and
+  saving of 4ns and 14ns bunch patterns in by category and pattern name.
+
+------------------------------------------------------------------------------
+
+v1.2.9  --  17-21-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+                == General Changes ==
+- Current monitor status output shows gain setting transitions when they
+  occur.  
+
+- Current monitor update speed increased to approximately 4Hz.
+
+                  ==  Bugfixes ==
+- Position calculation in turn-by-turn data files adjusted.
+
+               == Feature Additions ==
+- Command line option '-c' will automatically start the 4ns bunch-by-bunch
+  current monitor upong application startup.
+
+------------------------------------------------------------------------------
+
+v1.2.8  --  14-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Fixed file descriptor leak causing segfault after some number of
+  pedestal table saves.
+
+- Server mode instances now publish the data file type and index value
+  into the CESR database CBPM control mailbox array.
+
+- Turn-by-turn (raw) data acquisitions requested via server mode are now
+  set to use the gate enable signal and the 60Hz trigger.
+
+               == Feature Additions ==
+- In managed mode, data enable triggering is now provided internally
+  for turn-by-turn data acquisitions.
+
+------------------------------------------------------------------------------
+
+v1.2.7  --  10-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Pedestal acquisition now returns each instrument to the timing setup and
+  gain setting it was in before the acquisition was requested.
+
+- 4ns current monitor mode tested and brought into conformity with 1.2->1.2
+  development branch transition.
+
+- 4ns current monitor now publishes strictly positive values to the 'ELE/POS
+  2NS MAMP' arrays so injection software is able to compute the total current
+  correctly and publish to the species-specific current value locations.
+
+- Fixed incorrect publishing location for data serial number (part of 
+  injection system handshake)
+
+- Fixed instrument location printout corruption in last stage of time-in
+  sequence.
+
+------------------------------------------------------------------------------
+
+v1.2.6  --  8-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Reset and init procedure correctly handles restoring gain settings again.
+
+           == Performance Optimizations ==
+- Session-based file output implemented and tested.  Drastically improves
+  the time it takes to save pedestal tables to disk.
+
+------------------------------------------------------------------------------
+
+v1.2.5  --  7-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+               == Feature Additions ==
+- Time scan operations now produce an on-screen summary of channel delay
+  changes produced.  Channel-to-channel or absolute channel delay
+  corrections greater than a certain magnitude are visually flagged.
+  
+- The channel trimming operation via the time_scan command is now
+  available in server mode to 3rd party applications.
+
+- Raw (turn-by-turn) data acquisitions hardcoded at 1024 turns are now
+  available in server mode to 3rd party applications.
+
+------------------------------------------------------------------------------
+
+v1.2.4  --  1-Dec-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Fixed bug in time_in sequence that prevented 14ns electron timings from
+  being properly acquired.
+- Fixed bug in orbit data publishing that wrote electron data to the wrong
+  block of the DDATA database array.
+
+------------------------------------------------------------------------------
+
+v1.2.3  --  30-Nov-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Expanded consistency enforcement between timing setup and gain regime
+  when starting up in an arbitrary timing setup.  A case was overlooked
+  with the previous fix.
+
+- Inability to CTRL-C out of server mode when an instrument encoutered
+  an error during startup communications checks fixed.
+
+- DSP code bugfix in get_betatron_phase_A button sum calculation was
+  not using corrected ADC values.  Now uses corrected values in button
+  sum used in accumulator entry product.
+
+------------------------------------------------------------------------------
+
+v1.2.2  --  25-Nov-2009   <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Keeps proper consistency between timing setup and gain regime
+  (fixed vs. variable) when starting up in an arbitrary timing setup.
+
+               == Feature Additions ==
+- Added new DUMP RAW DATA command.  This will write to disk the collection
+  of turn-by-turn data used for the most recently executed command.
+
+------------------------------------------------------------------------------
+
+v1.2.1  --  21-Nov-2009   <mcr> -- mcr38@cornell.edu
+
+               == General Changes ==
+
+                  ==  Bugfixes ==
+- Fixed processed (averaged) data routine in DSP code that took the
+  absolute value of all data coming from the front ends instead of the
+  intended temporary comparison value.
+
+           == Performance Optimizations ==
+- Pedestal acquisition now acquires values for all channels, all supported
+  timing setups, and all gain ranges as a single on-instrument operation.
+  Tables are read back as a single unit.
+
+               == Feature Additions ==
+- Added first pass at support of two-tier operation.
+  Application can be placed in 'manager' mode or 'back-end' mode.
+  
+  The manager mode allows for the spawning and control of an arbitrary
+  number of parallel back-end instances on separate host machines. Each
+  back-end instance is then responsible (as in the present unmanaged 
+  operation mode) for the direct control and read-back of some number of
+  instruments.
+  
+  The back-end mode is a lower level concept and is meant to be initiated 
+  by a manager mode instance, though for testing purposes it can be 
+  manually invoked as well.
+
+  Single data file creation for arbitrary file-generating commands is
+  supported and allows for a single data file to be produced containing 
+  the output of any number of back-end processes, preserving a 
+  'one measurement, one data file' idea regardless of how the instrument
+  subsets are distributed.
+  
+  Support for this feature is operational, but presently serves as a
+  proof-of-concept and will be made more user friendly in a future 
+  release.
+
+  Detailed usage notes will follow further development.
+
+------------------------------------------------------------------------------
+
+v1.2.0  --  14-Oct-2009?   <mcr> -- mcr38@cornell.edu
+
+               == General Changes ==
+- Merging of 1.1.2 operations branch and the reorganized and efficiency-
+  optimized design update concerning timing and gain parameters, their 
+  storage, transfer, and use.
+
+                  ==  Bugfixes ==
+- Now server mode can be terminated to enter interactive mode for the
+  purpose of instrument subset investigations and placed back into server 
+  mode with no ill effects such as servers ignoring 3rd party command
+  requests as sometimes happened prior to this fix.
+
+           == Performance Optimizations ==
+- Command handshake checking now occurs far more rapidly
+- Customization option for max number of handshake tries added
+- Partitioned supplementary data read back as a result of a processed
+  data (orbit) measurement by debug verbosity to only transfer the 
+  minimum essential data for each measurement unless extra is explicitly
+  requested.
+
+               == Feature Additions ==
+- User convenience feature added: Ability to store named bunch patterns
+  for quick retrieval.  See application configuration file template 
+  (cbic.conf) for location of bunch pattern definition file.  
+  Documentation on use of stored bunch patterns will live in that file
+  and in master documentation.
+
+------------------------------------------------------------------------------
+
+v1.1.2  --  12-Oct-2009  <mcr> -- mcr38@cornell.edu
+
+                  ==  Bugfixes ==
+- Bugfix to ensure recovery mode flag is reset for all instruments after 
+  a command or sequence is processed.
+
+------------------------------------------------------------------------------
+
+v1.1.1  --  6-Oct-2009  <mcr> -- mcr38@cornell.edu
+
+             == General Changes/Additions ==
+- Changed time scan bunch index entry to be less ambiguous for 14ns timing
+  setups.  Always prompts for an index in the range 1-183 for those modes,
+  but transparently takes the species into account for activating bunch bits
+  on the appropriate timing block.
+
+------------------------------------------------------------------------------
+  
+v1.1.0  --  2-Oct-2009  <mcr> -- mcr38@cornell.edu
+
+             == General Changes/Additions ==
+- Runtime error classification expanded.  Each command execution now provides 
+  a command status summary of each instrument that was party to the command 
+  request.
+- A recovery sequence will be run for all instruments that encounter errors
+  above a criticality threshold during command dispatching, execution, or 
+  post-processing.
+  The recovery sequence will attempt a low-level XBUS-delivered hardware reset
+  of each problem instrument's CPU as well as its ethernet communications 
+  processor.
+  After the boot period has elapsed, the recovery sequence will attempt to 
+  reinitialize the timing and gain operational parameters to their pre-fault
+  state.  If an additional error is encountered during the recovery process,
+  the instrument will remain online, but will be deactivated for all further 
+  command requests.
+  
+  
+        == Command-line Option Changes/Additions ==
+- '-h' : Help text expanded / updated.  See '-h' output for details on the
+         options below.
+- '-d' : Multi-level debug verbosity settings implemented
+- '-v' : Updated, displays application and support component version info.
+- '-s' : Added for starting up application and automatically entering BPM 
+         server mode once instruments are online.
+- '-f' <filename> : Added for allowing custom application config file usage.
+
+
+        == Operational Support Changes/Additions ==
+- A single install location is used for holding the CBIC appliction executable
+       /a/lnx180c/nfs/cesr/mnt/linux_bin/cbic
+  This is a symbolic link to the version-named copy of the executable.
+  As new versions are installed, the link will be adjusted.
+
+------------------------------------------------------------------------------
+
+v1.0.0  --  4-Sep-2009  <mcr> -- mcr38@cornell.edu
+
+- First version installed for operations
